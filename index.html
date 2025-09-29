@@ -59,13 +59,12 @@
       <div class="row">
         <div>
           <label for="s1hum">습도(%)</label>
-          <select id="s1hum">
-            <option value="60">60</option>
-            <option value="80">80</option>
+          <!-- Stage1 습도는 90만 선택 가능 -->
+          <select id="s1hum" disabled>
             <option value="90" selected>90</option>
           </select>
         </div>
-        <div><!-- 자리 맞춤용 빈 칸 --></div>
+        <div><!-- 자리 맞춤 --></div>
       </div>
 
       <h2>Stage2</h2>
@@ -96,11 +95,9 @@
         </div>
         <div>
           <label for="thinning">솎기(조합용)</label>
-          <select id="thinning">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="none" selected>무처리</option>
+          <!-- 조합에서 T는 10만 선택 가능 -->
+          <select id="thinning" disabled>
+            <option value="10" selected>10</option>
           </select>
         </div>
       </div>
@@ -149,9 +146,9 @@
       </div>
 
       <div class="hint">
-        조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_L{on|off}_S1H{60|80|90}_S2T{15|18}_H{60|80|90}_L{on|off}_T{5|10|20|none}.mp4</code><br>
+        조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4</code><br>
         품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> / 노화: <code>assets/videos/aging/aging.mp4</code><br>
-        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code> / <b>조합에서 솎기=none</b> → <code>thinning/thinning_none.mp4</code>
+        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code>
       </div>
 
     </section>
@@ -171,15 +168,21 @@
     // 선택자
     const selS1T = document.getElementById("s1temp");
     const selS1L = document.getElementById("s1light");
-    const selS1H = document.getElementById("s1hum");   // ★ Stage1 습도 추가
+    const selS1H = document.getElementById("s1hum");   // Stage1 습도(90 고정)
     const selS2T = document.getElementById("s2temp");
     const selS2H = document.getElementById("s2hum");
     const selS2L = document.getElementById("s2light");
-    const selThin = document.getElementById("thinning");
+
+    // 조합에서 T는 10 고정
+    const selThinFixed = document.getElementById("thinning");
+
     const selQual = document.getElementById("quality");
     const selAging= document.getElementById("aging");
+
+    // 솎기 단독
     const selThinMode = document.getElementById("thinMode");
     const selThinSolo = document.getElementById("thinSolo");
+
     const playBtn = document.getElementById("playBtn");
     const pauseBtn= document.getElementById("pauseBtn");
 
@@ -198,14 +201,19 @@
       }
     }
 
-    // 파일명 빌더 (S1H 추가)
+    // 파일명 빌더 (요청하신 새 규칙)
     function buildComboFile() {
-      return `mushroom_S1T${selS1T.value}_L${selS1L.value}_S1H${selS1H.value}`
-           + `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T${selThin.value}.mp4`;
+      // 예: mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4
+      return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`
+           + `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
     function buildQualityFile() { return `${selQual.value}.mp4`; }
     function buildAgingFile()   { return `aging.mp4`; }
-    function buildThinSoloFile(){ return `thinning_${selThinSolo.value}.mp4`; }
+    function buildThinSoloFile(){
+      // thinning_{5|10|20|none}.mp4
+      const v = selThinSolo.value;
+      return `thinning_${v}.mp4`;
+    }
 
     function withCacheBuster(url) {
       const u = new URL(url, window.location.href);
@@ -225,17 +233,12 @@
         path = `${base}/aging/${buildAgingFile()}`;
 
       // 3) 솎기 단독
-      } else if (selThinMode.value === "on") {
-        const solo = selThinSolo.value;
-        path = `${base}/thinning/${solo === "none" ? "thinning_none.mp4" : `thinning_${solo}.mp4`}`;
+      } else if (selThinMode.value === "on" && selThinSolo.value !== "none") {
+        path = `${base}/thinning/${buildThinSoloFile()}`;
 
-      // 4) 조합
+      // 4) 조합 (T=10 고정, S1H=90 고정)
       } else {
-        if (selThin.value === "none") {
-          path = `${base}/thinning/thinning_none.mp4`;
-        } else {
-          path = `${base}/${buildComboFile()}`;
-        }
+        path = `${base}/${buildComboFile()}`;
       }
 
       const url = encodeURI(path);
@@ -265,9 +268,9 @@
       catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
     }
 
-    // 이벤트 바인딩 (S1H 포함)
+    // 이벤트 바인딩
     [
-      selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selThin,
+      selS1T, selS1L, selS1H, selS2T, selS2H, selS2L,
       selQual, selAging, selThinMode, selThinSolo
     ].forEach(el => el.addEventListener("change", updateVideo));
 
