@@ -13,7 +13,8 @@
     .sub { color:var(--muted); font-size:13px; }
     main { display:grid; grid-template-columns: 340px 1fr; gap:16px; padding:20px; max-width:1200px; margin:0 auto; }
     .card { background:var(--card); padding:16px; border-radius:12px; border:1px solid var(--line); }
-    h2 { margin:0 0 10px; font-size:16px; }
+    h2 { margin:14px 0 10px; font-size:16px; }
+    h2:first-of-type { margin-top:0; }
     label { font-size:12px; display:block; margin:10px 0 6px; color:var(--muted); }
     select { width:100%; padding:8px 10px; border-radius:8px; background:#0f141a; color:var(--text); border:1px solid #2a3847; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -25,13 +26,12 @@
     button { padding:8px 12px; border-radius:8px; border:1px solid #2a3847; background:#0f141a; color:var(--text); cursor:pointer; }
     button:hover { border-color:#395068; }
     @media (max-width: 980px) { main { grid-template-columns:1fr; } }
-    .section { border-top:1px dashed #263443; margin-top:14px; padding-top:14px; }
   </style>
 </head>
 <body>
   <header>
     <h1>버섯 생육 시뮬레이션</h1>
-    <div class="sub">Stage1 → Stage2 조건을 선택하거나, 환경조건과 무관한 보기(품질/노화/솎기)를 선택하세요. (무음 자동재생)</div>
+    <div class="sub">Stage1 → Stage2 조건 또는 추가 보기(품질/노화/솎기 단독)를 선택하면 해당 영상이 재생됩니다. (무음 자동재생)</div>
   </header>
 
   <main>
@@ -57,81 +57,78 @@
         </div>
       </div>
 
-      <div class="section">
-        <h2>Stage2</h2>
-        <div class="row">
-          <div>
-            <label for="s2temp">온도(°C)</label>
-            <select id="s2temp">
-              <option value="15">15</option>
-              <option value="18">18</option>
-            </select>
-          </div>
-          <div>
-            <label for="s2hum">습도(%)</label>
-            <select id="s2hum">
-              <option value="60">60</option>
-              <option value="80" selected>80</option>
-              <option value="90">90</option>
-            </select>
-          </div>
+      <h2>Stage2</h2>
+      <div class="row">
+        <div>
+          <label for="s2temp">온도(°C)</label>
+          <select id="s2temp">
+            <option value="15">15</option>
+            <option value="18">18</option>
+          </select>
         </div>
-        <div class="row">
-          <div>
-            <label for="s2light">광</label>
-            <select id="s2light">
-              <option value="on">on</option>
-              <option value="off">off</option>
-            </select>
-          </div>
-          <div>
-            <label for="thinning">솎기(환경조건 포함 조합용)</label>
-            <select id="thinning">
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="none" selected>무처리</option>
-            </select>
-          </div>
+        <div>
+          <label for="s2hum">습도(%)</label>
+          <select id="s2hum">
+            <option value="60">60</option>
+            <option value="80" selected>80</option>
+            <option value="90">90</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="s2light">광</label>
+          <select id="s2light">
+            <option value="on">on</option>
+            <option value="off">off</option>
+          </select>
+        </div>
+        <div>
+          <label for="thinning">솎기(조합용)</label>
+          <select id="thinning">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="none" selected>무처리</option>
+          </select>
         </div>
       </div>
 
-        <h2>추가 보기 (환경조건 무관)</h2>
-        <div class="row">
-          <div>
-            <label for="quality">품질 등급</label>
-            <select id="quality">
-              <option value="none" selected>—</option>
-              <option value="quality_excellent">특상 (excellent)</option>
-              <option value="quality_high">상 (high)</option>
-              <option value="quality_normal">보통 (normal)</option>
-            </select>
-          </div>
-          <div>
-            <label for="aging">노화 과정</label>
-            <select id="aging">
-              <option value="none" selected>—</option>
-              <option value="on">보기</option>
-            </select>
-          </div>
+      <h2>추가 보기 (환경조건 무관)</h2>
+      <div class="row">
+        <div>
+          <label for="quality">품질 등급</label>
+          <select id="quality">
+            <option value="none" selected>—</option>
+            <option value="quality_excellent">특상 (excellent)</option>
+            <option value="quality_high">상 (high)</option>
+            <option value="quality_normal">보통 (normal)</option>
+          </select>
         </div>
-        <div class="row">
-          <div>
-            <label for="thinMode">솎기 단독 모드</label>
-            <select id="thinMode">
+        <div>
+          <label for="aging">노화 과정</label>
+          <select id="aging">
+            <option value="none" selected>—</option>
+            <option value="on">보기</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="thinMode">솎기 단독 모드</label>
+          <select id="thinMode">
             <option value="off" selected>—</option>
             <option value="on">보기</option>
           </select>
         </div>
-          <div>
-            <label for="thinSolo">솎기(단독 보기용)</label>
-            <select id="thinSolo">
-              <option value="none" selected>none</option>
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-            </select>
-          </div>
+        <div>
+          <label for="thinSolo">솎기(단독)</label>
+          <select id="thinSolo">
+            <option value="none" selected>—</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
         </div>
       </div>
 
@@ -141,11 +138,11 @@
       </div>
 
       <div class="hint">
-        조합(환경 반영) 파일: <code>assets/videos/mushroom_S1T{13|18|23}_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T{5|10|20|none}.mp4</code><br>
-        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code><br>
-        노화: <code>assets/videos/aging/aging.mp4</code><br>
-        <b>솎기 단독:</b> <code>assets/videos/thinning/thinning_{none|5|10|20}.mp4</code>
+        조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T{5|10|20|none}.mp4</code><br>
+        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> / 노화: <code>assets/videos/aging/aging.mp4</code><br>
+        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20}.mp4</code> / <b>조합에서 솎기=none</b> → <code>thinning/thinning_none.mp4</code>
       </div>
+
     </section>
 
     <!-- 우측: 플레이어 -->
@@ -160,24 +157,21 @@
     const player = document.getElementById("player");
     const statusEl = document.getElementById("status");
 
+    // 선택자
     const selS1T = document.getElementById("s1temp");
     const selS1L = document.getElementById("s1light");
     const selS2T = document.getElementById("s2temp");
     const selS2H = document.getElementById("s2hum");
     const selS2L = document.getElementById("s2light");
     const selThin = document.getElementById("thinning");
-
     const selQual = document.getElementById("quality");
     const selAging= document.getElementById("aging");
-
-    // 새로 추가: 솎기 단독 보기
     const selThinMode = document.getElementById("thinMode");
     const selThinSolo = document.getElementById("thinSolo");
-
     const playBtn = document.getElementById("playBtn");
     const pauseBtn= document.getElementById("pauseBtn");
 
-    // 404를 미리 잡기 위한 HEAD 요청 캐시
+    // 파일 존재 HEAD 캐시
     const existsCache = new Map();
     async function fileExists(url) {
       if (existsCache.has(url)) return existsCache.get(url);
@@ -192,20 +186,15 @@
       }
     }
 
+    // 파일명 빌더
     function buildComboFile() {
       return `mushroom_S1T${selS1T.value}_L${selS1L.value}`
            + `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T${selThin.value}.mp4`;
     }
-    function buildQualityFile() {
-      return `${selQual.value}.mp4`; // quality_excellent.mp4 등
-    }
-    function buildAgingFile() {
-      return `aging.mp4`;
-    }
-    function buildThinSoloFile() {
-      // thinning 단독 보기: thinning_{5|10|20}.mp4
-      return `thinning_${selThinSolo.value}.mp4`;
-    }
+    function buildQualityFile() { return `${selQual.value}.mp4`; }
+    function buildAgingFile()   { return `aging.mp4`; }
+    function buildThinSoloFile(){ return `thinning_${selThinSolo.value}.mp4`; }
+
     function withCacheBuster(url) {
       const u = new URL(url, window.location.href);
       u.searchParams.set("v", Date.now().toString());
@@ -223,18 +212,23 @@
       } else if (selAging.value === "on") {
         path = `${base}/aging/${buildAgingFile()}`;
 
-      // 3) 솎기 단독 보기 모드
+      // 3) 솎기 단독 보기
       } else if (selThinMode.value === "on" && selThinSolo.value !== "none") {
         path = `${base}/thinning/${buildThinSoloFile()}`;
 
-      // 4) 기본: Stage1+2 조합
+      // 4) 조합
       } else {
-        path = `${base}/${buildComboFile()}`;
+        // 조합에서 솎기=none이면 thinning_none.mp4로 대체
+        if (selThin.value === "none") {
+          path = `${base}/thinning/thinning_none.mp4`;
+        } else {
+          path = `${base}/${buildComboFile()}`;
+        }
       }
 
       const url = encodeURI(path);
 
-      // 404 사전 체크
+      // 404 체크
       const ok = await fileExists(url);
       if (!ok) {
         statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
@@ -248,7 +242,6 @@
       try { player.pause(); } catch {}
       player.removeAttribute("src");
       player.load();
-
       player.src = withCacheBuster(url);
       player.muted = true;
       player.playsInline = true;
@@ -260,13 +253,11 @@
         statusEl.textContent = `재생 중: ${path}`;
       };
 
-      try {
-        await player.play();
-      } catch {
-        statusEl.innerHTML = `자동재생이 차단됨 → <b>재생 버튼</b>을 눌러주세요: <code>${path}</code>`;
-      }
+      try { await player.play(); }
+      catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
     }
 
+    // 이벤트 바인딩
     [
       selS1T, selS1L, selS2T, selS2H, selS2L, selThin,
       selQual, selAging, selThinMode, selThinSolo
@@ -275,10 +266,8 @@
     playBtn.addEventListener("click", () => player.play());
     pauseBtn.addEventListener("click", () => player.pause());
 
-    // 최초 1회 로드
+    // 초기 로드
     updateVideo();
   </script>
 </body>
 </html>
-
-
