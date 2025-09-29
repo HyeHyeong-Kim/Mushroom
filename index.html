@@ -31,7 +31,7 @@
 <body>
   <header>
     <h1>버섯 생육 시뮬레이션</h1>
-    <div class="sub">Stage1 → Stage2 조건 또는 추가 보기(품질/노화/솎기 단독)를 선택하면 해당 영상이 재생됩니다. (무음 자동재생)</div>
+    <div class="sub">Stage1/Stage2 조건 또는 추가 보기(품질/노화/솎기 단독)를 선택하면 해당 영상이 재생됩니다. (무음 자동재생)</div>
   </header>
 
   <main>
@@ -55,6 +55,17 @@
             <option value="off">off</option>
           </select>
         </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="s1hum">습도(%)</label>
+          <select id="s1hum">
+            <option value="60">60</option>
+            <option value="80">80</option>
+            <option value="90" selected>90</option>
+          </select>
+        </div>
+        <div><!-- 자리 맞춤용 빈 칸 --></div>
       </div>
 
       <h2>Stage2</h2>
@@ -138,9 +149,9 @@
       </div>
 
       <div class="hint">
-        조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T{5|10|20|none}.mp4</code><br>
+        조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_L{on|off}_S1H{60|80|90}_S2T{15|18}_H{60|80|90}_L{on|off}_T{5|10|20|none}.mp4</code><br>
         품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> / 노화: <code>assets/videos/aging/aging.mp4</code><br>
-        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20}.mp4</code> / <b>조합에서 솎기=none</b> → <code>thinning/thinning_none.mp4</code>
+        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code> / <b>조합에서 솎기=none</b> → <code>thinning/thinning_none.mp4</code>
       </div>
 
     </section>
@@ -160,6 +171,7 @@
     // 선택자
     const selS1T = document.getElementById("s1temp");
     const selS1L = document.getElementById("s1light");
+    const selS1H = document.getElementById("s1hum");   // ★ Stage1 습도 추가
     const selS2T = document.getElementById("s2temp");
     const selS2H = document.getElementById("s2hum");
     const selS2L = document.getElementById("s2light");
@@ -186,9 +198,9 @@
       }
     }
 
-    // 파일명 빌더
+    // 파일명 빌더 (S1H 추가)
     function buildComboFile() {
-      return `mushroom_S1T${selS1T.value}_L${selS1L.value}`
+      return `mushroom_S1T${selS1T.value}_L${selS1L.value}_S1H${selS1H.value}`
            + `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T${selThin.value}.mp4`;
     }
     function buildQualityFile() { return `${selQual.value}.mp4`; }
@@ -201,67 +213,61 @@
       return u.toString();
     }
 
-  async function updateVideo() {
-    let path;
+    async function updateVideo() {
+      let path;
 
-    // 1) 품질 우선
-    if (selQual.value !== "none") {
-      path = `${base}/quality/${buildQualityFile()}`;
+      // 1) 품질
+      if (selQual.value !== "none") {
+        path = `${base}/quality/${buildQualityFile()}`;
 
-    // 2) 노화
-    } else if (selAging.value === "on") {
-      path = `${base}/aging/${buildAgingFile()}`;
+      // 2) 노화
+      } else if (selAging.value === "on") {
+        path = `${base}/aging/${buildAgingFile()}`;
 
-    // 3) 솎기 단독 보기  ← ★ 변경: thinSolo가 'none'이어도 thinning_none.mp4 재생
-    } else if (selThinMode.value === "on") {
-      const solo = selThinSolo.value;
-      path = `${base}/thinning/${solo === "none" ? "thinning_none.mp4" : `thinning_${solo}.mp4`}`;
+      // 3) 솎기 단독
+      } else if (selThinMode.value === "on") {
+        const solo = selThinSolo.value;
+        path = `${base}/thinning/${solo === "none" ? "thinning_none.mp4" : `thinning_${solo}.mp4`}`;
 
-    // 4) Stage1+2 조합
-    } else {
-      // 조합에서 솎기=none이면 thinning_none.mp4로 대체
-      if (selThin.value === "none") {
-        path = `${base}/thinning/thinning_none.mp4`;
+      // 4) 조합
       } else {
-        path = `${base}/${buildComboFile()}`;
+        if (selThin.value === "none") {
+          path = `${base}/thinning/thinning_none.mp4`;
+        } else {
+          path = `${base}/${buildComboFile()}`;
+        }
       }
-    }
 
-    const url = encodeURI(path);
+      const url = encodeURI(path);
 
-    // 이하 동일 (파일 존재 체크, 소스 교체, 자동재생 처리)
-    const ok = await fileExists(url);
-    if (!ok) {
-      statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
+      // 존재 체크
+      const ok = await fileExists(url);
+      if (!ok) {
+        statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
+        try { player.pause(); } catch {}
+        player.removeAttribute("src");
+        player.load();
+        return;
+      }
+
+      // 소스 교체
       try { player.pause(); } catch {}
       player.removeAttribute("src");
       player.load();
-      return;
+      player.src = withCacheBuster(url);
+      player.muted = true;
+      player.playsInline = true;
+
+      player.onerror = () => { statusEl.innerHTML = `<span class="err">재생 오류: <code>${path}</code></span>`; };
+      player.oncanplay = () => { statusEl.textContent = `재생 중: ${path}`; };
+
+      try { await player.play(); }
+      catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
     }
 
-    try { player.pause(); } catch {}
-    player.removeAttribute("src");
-    player.load();
-
-    player.src = withCacheBuster(url);
-    player.muted = true;
-    player.playsInline = true;
-
-    player.onerror = () => {
-      statusEl.innerHTML = `<span class="err">재생 오류: <code>${path}</code></span>`;
-    };
-    player.oncanplay = () => {
-      statusEl.textContent = `재생 중: ${path}`;
-    };
-
-    try { await player.play(); }
-    catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
-  }
-
-
-    // 이벤트 바인딩
+    // 이벤트 바인딩 (S1H 포함)
     [
-      selS1T, selS1L, selS2T, selS2H, selS2L, selThin,
+      selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selThin,
       selQual, selAging, selThinMode, selThinSolo
     ].forEach(el => el.addEventListener("change", updateVideo));
 
@@ -273,5 +279,3 @@
   </script>
 </body>
 </html>
-
-
