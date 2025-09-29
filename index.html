@@ -213,8 +213,9 @@
         path = `${base}/aging/${buildAgingFile()}`;
 
       // 3) 솎기 단독 보기
-      } else if (selThinMode.value === "on" && selThinSolo.value !== "none") {
-        path = `${base}/thinning/${buildThinSoloFile()}`;
+      } else if (selThinMode.value === "on") {
+      const solo = selThinSolo.value;
+      path = `${base}/thinning/${solo === "none" ? "thinning_none.mp4" : `thinning_${solo}.mp4`}`;
 
       // 4) 조합
       } else {
@@ -271,3 +272,4 @@
   </script>
 </body>
 </html>
+
