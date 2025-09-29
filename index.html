@@ -201,62 +201,63 @@
       return u.toString();
     }
 
-    async function updateVideo() {
-      let path;
+  async function updateVideo() {
+    let path;
 
-      // 1) 품질 우선
-      if (selQual.value !== "none") {
-        path = `${base}/quality/${buildQualityFile()}`;
+    // 1) 품질 우선
+    if (selQual.value !== "none") {
+      path = `${base}/quality/${buildQualityFile()}`;
 
-      // 2) 노화
-      } else if (selAging.value === "on") {
-        path = `${base}/aging/${buildAgingFile()}`;
+    // 2) 노화
+    } else if (selAging.value === "on") {
+      path = `${base}/aging/${buildAgingFile()}`;
 
-      // 3) 솎기 단독 보기
-      } else if (selThinMode.value === "on") {
+    // 3) 솎기 단독 보기  ← ★ 변경: thinSolo가 'none'이어도 thinning_none.mp4 재생
+    } else if (selThinMode.value === "on") {
       const solo = selThinSolo.value;
       path = `${base}/thinning/${solo === "none" ? "thinning_none.mp4" : `thinning_${solo}.mp4`}`;
 
-      // 4) 조합
+    // 4) Stage1+2 조합
+    } else {
+      // 조합에서 솎기=none이면 thinning_none.mp4로 대체
+      if (selThin.value === "none") {
+        path = `${base}/thinning/thinning_none.mp4`;
       } else {
-        // 조합에서 솎기=none이면 thinning_none.mp4로 대체
-        if (selThin.value === "none") {
-          path = `${base}/thinning/thinning_none.mp4`;
-        } else {
-          path = `${base}/${buildComboFile()}`;
-        }
+        path = `${base}/${buildComboFile()}`;
       }
+    }
 
-      const url = encodeURI(path);
+    const url = encodeURI(path);
 
-      // 404 체크
-      const ok = await fileExists(url);
-      if (!ok) {
-        statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
-        try { player.pause(); } catch {}
-        player.removeAttribute("src");
-        player.load();
-        return;
-      }
-
-      // 소스 교체 (캐시 우회)
+    // 이하 동일 (파일 존재 체크, 소스 교체, 자동재생 처리)
+    const ok = await fileExists(url);
+    if (!ok) {
+      statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
       try { player.pause(); } catch {}
       player.removeAttribute("src");
       player.load();
-      player.src = withCacheBuster(url);
-      player.muted = true;
-      player.playsInline = true;
-
-      player.onerror = () => {
-        statusEl.innerHTML = `<span class="err">재생 오류: <code>${path}</code></span>`;
-      };
-      player.oncanplay = () => {
-        statusEl.textContent = `재생 중: ${path}`;
-      };
-
-      try { await player.play(); }
-      catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
+      return;
     }
+
+    try { player.pause(); } catch {}
+    player.removeAttribute("src");
+    player.load();
+
+    player.src = withCacheBuster(url);
+    player.muted = true;
+    player.playsInline = true;
+
+    player.onerror = () => {
+      statusEl.innerHTML = `<span class="err">재생 오류: <code>${path}</code></span>`;
+    };
+    player.oncanplay = () => {
+      statusEl.textContent = `재생 중: ${path}`;
+    };
+
+    try { await player.play(); }
+    catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
+  }
+
 
     // 이벤트 바인딩
     [
@@ -272,4 +273,5 @@
   </script>
 </body>
 </html>
+
 
