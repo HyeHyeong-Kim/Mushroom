@@ -11,7 +11,7 @@
     header { padding:16px 24px; border-bottom:1px solid #1f2a33; }
     h1 { margin:0 0 4px; font-size:20px; }
     .sub { color:var(--muted); font-size:13px; }
-    main { display:grid; grid-template-columns: 340px 1fr; gap:16px; padding:20px; max-width:1200px; margin:0 auto; }
+    main { display:grid; grid-template-columns: 360px 1fr; gap:16px; padding:20px; max-width:1400px; margin:0 auto; }
     .card { background:var(--card); padding:16px; border-radius:12px; border:1px solid var(--line); }
     h2 { margin:14px 0 10px; font-size:16px; }
     h2:first-of-type { margin-top:0; }
@@ -19,25 +19,30 @@
     select { width:100%; padding:8px 10px; border-radius:8px; background:#0f141a; color:var(--text); border:1px solid #2a3847; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .hint { font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; }
-    video { width:100%; border-radius:12px; background:#000; max-height:72vh; }
     .status { font-size:13px; color:var(--muted); margin-top:8px; min-height:1.2em; }
     .err { color:#ffa8a8; }
-    .actions { display:flex; gap:10px; margin-top:12px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
     button { padding:8px 12px; border-radius:8px; border:1px solid #2a3847; background:#0f141a; color:var(--text); cursor:pointer; }
     button:hover { border-color:#395068; }
-    @media (max-width: 980px) { main { grid-template-columns:1fr; } }
+    .stack { display:grid; gap:16px; }
+    .stack .vcard { padding:12px; border-radius:12px; background:#0e1319; border:1px solid #1e2a36; }
+    .vtitle { display:flex; align-items:center; gap:10px; margin:4px 0 10px; color:#b7c6d4; font-size:14px; }
+    .badge { font-size:11px; padding:2px 8px; border-radius:999px; border:1px solid #314659; color:#cfe3f7; }
+    video { width:100%; border-radius:10px; background:#000; max-height:48vh; }
+    @media (max-width: 1024px) { main { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <header>
     <h1>버섯 생육 시뮬레이션</h1>
-    <div class="sub">Stage1/Stage2 조건 또는 추가 보기(품질/노화/솎기 단독)를 선택하면 해당 영상이 재생됩니다. (무음 자동재생)</div>
+    <div class="sub">
+      상단: <b>표준 영상</b> 자동 재생 · 하단: 선택한 조건/모드의 <b>비교 영상</b> 동시 재생. (무음 자동재생)
+    </div>
   </header>
 
   <main>
-    <!-- 좌측: 컨트롤 -->
+    <!-- 좌측 컨트롤 -->
     <section class="card">
-
       <h2>Stage1</h2>
       <div class="row">
         <div>
@@ -51,7 +56,7 @@
         <div>
           <label for="s1light">광</label>
           <select id="s1light">
-            <option value="on">on</option>
+            <option value="on" selected>on</option>
             <option value="off">off</option>
           </select>
         </div>
@@ -59,12 +64,12 @@
       <div class="row">
         <div>
           <label for="s1hum">습도(%)</label>
-          <!-- Stage1 습도는 90만 선택 가능 -->
+          <!-- Stage1 습도는 90 고정 -->
           <select id="s1hum" disabled>
             <option value="90" selected>90</option>
           </select>
         </div>
-        <div><!-- 자리 맞춤 --></div>
+        <div><!-- 자리맞춤 --></div>
       </div>
 
       <h2>Stage2</h2>
@@ -73,7 +78,7 @@
           <label for="s2temp">온도(°C)</label>
           <select id="s2temp">
             <option value="15">15</option>
-            <option value="18">18</option>
+            <option value="18" selected>18</option>
           </select>
         </div>
         <div>
@@ -89,13 +94,12 @@
         <div>
           <label for="s2light">광</label>
           <select id="s2light">
-            <option value="on">on</option>
+            <option value="on" selected>on</option>
             <option value="off">off</option>
           </select>
         </div>
         <div>
-          <label for="thinning">솎기(조합용)</label>
-          <!-- 조합에서 T는 10만 선택 가능 -->
+          <label for="thinning">솎기(조합용: T=10 고정)</label>
           <select id="thinning" disabled>
             <option value="10" selected>10</option>
           </select>
@@ -141,67 +145,73 @@
       </div>
 
       <div class="actions">
-        <button id="playBtn">재생</button>
-        <button id="pauseBtn">일시정지</button>
+        <button id="playBoth">둘다 재생</button>
+        <button id="pauseBoth">둘다 정지</button>
+        <button id="syncTime">동기화(현재 시점 맞추기)</button>
       </div>
 
       <div class="hint">
         조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4</code><br>
-        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> / 노화: <code>assets/videos/aging/aging.mp4</code><br>
-        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code>
+        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> · 노화: <code>assets/videos/aging/aging.mp4</code><br>
+        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code><br>
+        표준 영상: <code>assets/videos/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4</code>
       </div>
-
     </section>
 
-    <!-- 우측: 플레이어 -->
-    <section class="card">
-      <video id="player" controls muted autoplay playsinline></video>
-      <div id="status" class="status">조건을 선택하면 영상이 재생됩니다.</div>
+    <!-- 우측: 상단 기준(표준), 하단 비교 -->
+    <section class="stack">
+      <div class="vcard">
+        <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
+        <video id="stdPlayer" controls muted autoplay playsinline></video>
+        <div id="stdStatus" class="status"></div>
+      </div>
+      <div class="vcard">
+        <div class="vtitle">비교 플레이어 <span class="badge">선택 조건/모드</span></div>
+        <video id="cmpPlayer" controls muted autoplay playsinline></video>
+        <div id="cmpStatus" class="status"></div>
+      </div>
     </section>
   </main>
 
   <script>
     const base = "assets/videos";
-    const player = document.getElementById("player");
-    const statusEl = document.getElementById("status");
+
+    // 표준(기준) 영상 고정 경로
+    const STANDARD_ID = "mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4";
+    const STANDARD_PATH = `${base}/${STANDARD_ID}`;
+
+    // DOM
+    const stdPlayer = document.getElementById("stdPlayer");
+    const cmpPlayer = document.getElementById("cmpPlayer");
+    const stdStatus = document.getElementById("stdStatus");
+    const cmpStatus = document.getElementById("cmpStatus");
 
     // 선택자
     const selS1T = document.getElementById("s1temp");
     const selS1L = document.getElementById("s1light");
-    const selS1H = document.getElementById("s1hum");   // Stage1 습도(90 고정)
+    const selS1H = document.getElementById("s1hum");   // 90 고정
     const selS2T = document.getElementById("s2temp");
     const selS2H = document.getElementById("s2hum");
     const selS2L = document.getElementById("s2light");
-
-    // 조합에서 T는 10 고정
-    const selThinFixed = document.getElementById("thinning");
-
     const selQual = document.getElementById("quality");
     const selAging= document.getElementById("aging");
-
-    // 솎기 단독
     const selThinMode = document.getElementById("thinMode");
     const selThinSolo = document.getElementById("thinSolo");
 
-    const playBtn = document.getElementById("playBtn");
-    const pauseBtn= document.getElementById("pauseBtn");
+    // 버튼
+    const playBoth  = document.getElementById("playBoth");
+    const pauseBoth = document.getElementById("pauseBoth");
+    const syncTime  = document.getElementById("syncTime");
 
     // 파일 존재 HEAD 캐시
     const existsCache = new Map();
     async function fileExists(url) {
       if (existsCache.has(url)) return existsCache.get(url);
-      try {
-        const res = await fetch(url, { method: "HEAD" });
-        const ok = res.ok;
-        existsCache.set(url, ok);
-        return ok;
-      } catch {
-        existsCache.set(url, false);
-        return false;
-      }
+      try { const r = await fetch(url, { method: "HEAD" }); existsCache.set(url, r.ok); return r.ok; }
+      catch { existsCache.set(url, false); return false; }
     }
 
-    // 파일명 빌더 (요청하신 새 규칙)
+    // 파일명 빌더(요청 규칙)
     function buildComboFile() {
       // 예: mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4
       return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`
@@ -210,75 +220,72 @@
     function buildQualityFile() { return `${selQual.value}.mp4`; }
     function buildAgingFile()   { return `aging.mp4`; }
     function buildThinSoloFile(){
-      // thinning_{5|10|20|none}.mp4
-      const v = selThinSolo.value;
+      const v = selThinSolo.value; // 5/10/20/none
       return `thinning_${v}.mp4`;
     }
-
     function withCacheBuster(url) {
       const u = new URL(url, window.location.href);
       u.searchParams.set("v", Date.now().toString());
       return u.toString();
     }
 
-    async function updateVideo() {
-      let path;
-
-      // 1) 품질
-      if (selQual.value !== "none") {
-        path = `${base}/quality/${buildQualityFile()}`;
-
-      // 2) 노화
-      } else if (selAging.value === "on") {
-        path = `${base}/aging/${buildAgingFile()}`;
-
-      // 3) 솎기 단독
-      } else if (selThinMode.value === "on" && selThinSolo.value !== "none") {
-        path = `${base}/thinning/${buildThinSoloFile()}`;
-
-      // 4) 조합 (T=10 고정, S1H=90 고정)
-      } else {
-        path = `${base}/${buildComboFile()}`;
-      }
-
-      const url = encodeURI(path);
-
-      // 존재 체크
+    // 공통 로더
+    async function loadToPlayer(player, statusEl, relPath) {
+      const url = encodeURI(relPath);
       const ok = await fileExists(url);
       if (!ok) {
-        statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${path}</code></span>`;
+        statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${relPath}</code></span>`;
         try { player.pause(); } catch {}
-        player.removeAttribute("src");
-        player.load();
-        return;
+        player.removeAttribute("src"); player.load();
+        return false;
       }
-
-      // 소스 교체
       try { player.pause(); } catch {}
-      player.removeAttribute("src");
-      player.load();
+      player.removeAttribute("src"); player.load();
       player.src = withCacheBuster(url);
-      player.muted = true;
-      player.playsInline = true;
-
-      player.onerror = () => { statusEl.innerHTML = `<span class="err">재생 오류: <code>${path}</code></span>`; };
-      player.oncanplay = () => { statusEl.textContent = `재생 중: ${path}`; };
-
-      try { await player.play(); }
-      catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼을 눌러주세요: <code>${path}</code>`; }
+      player.muted = true; player.playsInline = true;
+      player.onerror = () => { statusEl.innerHTML = `<span class="err">재생 오류: <code>${relPath}</code></span>`; };
+      player.oncanplay = () => { statusEl.textContent = `재생 중: ${relPath}`; };
+      try { await player.play(); } catch { statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼 클릭: <code>${relPath}</code>`; }
+      return true;
     }
 
-    // 이벤트 바인딩
-    [
-      selS1T, selS1L, selS1H, selS2T, selS2H, selS2L,
-      selQual, selAging, selThinMode, selThinSolo
-    ].forEach(el => el.addEventListener("change", updateVideo));
+    // 비교 플레이어 경로 결정
+    function buildComparePath() {
+      // 1) 품질
+      if (selQual.value !== "none") return `${base}/quality/${buildQualityFile()}`;
+      // 2) 노화
+      if (selAging.value === "on")  return `${base}/aging/${buildAgingFile()}`;
+      // 3) 솎기 단독
+      if (selThinMode.value === "on" && selThinSolo.value !== "none")
+        return `${base}/thinning/${buildThinSoloFile()}`;
+      // 4) 조합 (T=10 고정, S1H=90 고정)
+      return `${base}/${buildComboFile()}`;
+    }
 
-    playBtn.addEventListener("click", () => player.play());
-    pauseBtn.addEventListener("click", () => player.pause());
+    // 이벤트: 비교 플레이어 업데이트
+    async function updateCompare() {
+      const path = buildComparePath();
+      await loadToPlayer(cmpPlayer, cmpStatus, path);
+    }
 
-    // 초기 로드
-    updateVideo();
+    // 공통 버튼
+    playBoth.addEventListener("click", () => { stdPlayer.play(); cmpPlayer.play(); });
+    pauseBoth.addEventListener("click", () => { stdPlayer.pause(); cmpPlayer.pause(); });
+    syncTime.addEventListener("click", () => {
+      try { cmpPlayer.currentTime = stdPlayer.currentTime; } catch {}
+    });
+
+    // 선택 변경 시 비교 플레이어만 갱신
+    [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo]
+      .forEach(el => el.addEventListener("change", updateCompare));
+
+    // 초기 로드: 표준(상단) + 비교(현재 선택으로)
+    (async () => {
+      // 상단 표준 자동 재생
+      await loadToPlayer(stdPlayer, stdStatus, STANDARD_PATH);
+      // 하단 비교도 초기엔 표준과 같은 선택이므로 동일한 경로가 될 수 있음
+      await updateCompare();
+    })();
   </script>
 </body>
 </html>
