@@ -5,67 +5,75 @@
   <title>버섯 생육 시뮬레이션 뷰어</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* ===== THEME & GLOBAL TYPE SCALE (↑ 전체적으로 글자 크기 상향) ===== */
+    /* ===== THEME ===== */
     :root {
       --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
       --radius:14px;
+      --inc: 5pt; /* ← 전역 폰트 +5pt 증가치 */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       font-family:system-ui, Arial, "Noto Sans KR";
       background:var(--bg); color:var(--text); margin:0;
-      font-size:17px; line-height:1.55; /* 기존 대비 +1~2pt */
+      font-size:calc(17px + var(--inc)); /* 기존 17px에 +5pt */
+      line-height:1.55;
+      overflow-x:hidden; /* 좌측 이동으로 인한 가로 스크롤 방지 */
     }
 
-    /* ===== HEADER (좌측 여백 축소, 타이틀/툴바 여백 조정) ===== */
-    header{
+    /* ===== 공통 레이아웃: 좌측으로 5cm 이동 ===== */
+    .shift-left{ transform:translateX(-5cm); }
+    @media (max-width: 1024px){
+      .shift-left{ transform:none; } /* 모바일에서는 좌측 이동 미적용 */
+    }
+
+    /* ===== HEADER ===== */
+    header.shift-left{
       display:flex; justify-content:space-between; align-items:center;
       gap:12px; padding:10px 16px 8px; border-bottom:1px solid #16202a;
+      will-change: transform;
     }
-    h1{margin:0; font-size:24px; letter-spacing:.2px}
-    .sub{color:var(--muted); font-size:14px; margin-top:2px}
+    h1{margin:0; font-size:calc(24px + var(--inc)); letter-spacing:.2px}
+    .sub{color:var(--muted); font-size:calc(14px + var(--inc)); margin-top:2px}
     .toolbar{display:flex; gap:10px; flex-wrap:wrap}
     .btn{
       padding:10px 14px; border-radius:12px; border:1px solid #2a3847;
-      background:#0f141a; color:var(--text); cursor:pointer; font-size:15px
+      background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(15px + var(--inc))
     }
     .btn:hover{border-color:#415e7a}
 
-    /* ===== MAIN GRID (좌측 선택영역 크게, 상단 여백 감축) ===== */
-    main{
+    /* ===== MAIN GRID (폭은 그대로, 위치만 좌측 이동) ===== */
+    main.shift-left{
       display:grid;
-      grid-template-columns:minmax(440px, 560px) 1fr; /* ← 좌측 폭 확장 */
+      grid-template-columns:minmax(440px, 560px) 1fr; /* 폭 확장 없이 이전 값 유지 */
       gap:16px; padding:12px 16px 18px;
       max-width:1600px; margin:0 auto;
+      will-change: transform;
     }
-    /* 큰 화면에서는 더 크게 */
     @media (min-width:1400px){
-      main{ grid-template-columns: minmax(520px, 640px) 1fr; }
+      main.shift-left{ grid-template-columns: minmax(520px, 640px) 1fr; }
     }
 
-    /* ===== CARDS ===== */
+    /* ===== CARDS / CONTROLS ===== */
     .card{
       background:var(--card); padding:18px; border-radius:var(--radius); border:1px solid var(--line);
-      position:sticky; top:8px; /* ← 화면 상단에 고정되어 스크롤해도 계속 보임 */
+      position:sticky; top:8px;
     }
-    h2{margin:14px 0 10px; font-size:18px}
-    label{font-size:14px; display:block; margin:10px 0 8px; color:var(--muted)}
+    h2{margin:14px 0 10px; font-size:calc(18px + var(--inc))}
+    label{font-size:calc(14px + var(--inc)); display:block; margin:10px 0 8px; color:var(--muted)}
     select{
       width:100%; padding:10px 12px; border-radius:10px;
-      background:#0f141a; color:var(--text); border:1px solid #2a3847; font-size:15px
+      background:#0f141a; color:var(--text); border:1px solid #2a3847; font-size:calc(15px + var(--inc))
     }
     .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .hint{font-size:13.5px; color:var(--muted); margin-top:12px; line-height:1.55; word-break:break-all}
+    .hint{font-size:calc(13.5px + var(--inc)); color:var(--muted); margin-top:12px; line-height:1.55; word-break:break-all}
     .stack{display:grid; gap:16px}
     .vcard{padding:14px; border-radius:var(--radius); background:#0e1319; border:1px solid #1e2a36}
-    .vtitle{display:flex; align-items:center; gap:8px; margin:4px 0 10px; color:#cfe1f3; font-size:15px}
-    .badge{font-size:12px; padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
+    .vtitle{display:flex; align-items:center; gap:8px; margin:4px 0 10px; color:#cfe1f3; font-size:calc(15px + var(--inc))}
+    .badge{font-size:calc(12px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
     video{width:100%; border-radius:12px; background:#000; max-height:52vh}
-    .status{font-size:14px; color:var(--muted); min-height:1.2em; margin-top:6px}
+    .status{font-size:calc(14px + var(--inc)); color:var(--muted); min-height:1.2em; margin-top:6px}
     .err{color:#f7b5b5}
-
-    /* 2-up 비교 레이아웃 */
     .dual{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 
     /* ===== 사이드 패널(매뉴얼) ===== */
@@ -77,25 +85,26 @@
     .sidepanel.open{transform:translateX(0)}
     .phead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-bottom:1px solid #1c2a38}
     .tabs{display:flex; gap:8px}
-    .tab{padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38; color:#cfe3f7; cursor:pointer; font-size:14px}
+    .tab{padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38; color:#cfe3f7; cursor:pointer; font-size:calc(14px + var(--inc))}
     .tab.active{background:#1b2735; border-color:#35506d}
     .pcontent{padding:12px 14px; overflow:auto; flex:1}
     .stage{margin-bottom:16px; border:1px solid #1f2b38; border-radius:12px; padding:12px; background:#0c1117}
-    .stage h3{margin:0 0 8px; font-size:16px}
+    .stage h3{margin:0 0 8px; font-size:calc(16px + var(--inc))}
     .imgs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
     .imgs img{width:100%; height:150px; object-fit:cover; border-radius:10px; border:1px solid #25374a}
-    .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:14px; color:#b1c0cf; margin-top:6px}
+    .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:calc(14px + var(--inc)); color:#b1c0cf; margin-top:6px}
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
 
     @media (max-width:1024px){
+      main.shift-left, header.shift-left{ transform:none; }
       main{grid-template-columns:1fr}
       .card{position:static}
     }
   </style>
 </head>
 <body>
-  <header>
+  <header class="shift-left">
     <div>
       <h1>버섯 생육 시뮬레이션</h1>
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
@@ -108,8 +117,8 @@
     </div>
   </header>
 
-  <main>
-    <!-- 좌측 컨트롤 (확대 & sticky) -->
+  <main class="shift-left">
+    <!-- 좌측 컨트롤 -->
     <section class="card">
       <h2>Stage1</h2>
       <div class="row">
@@ -325,7 +334,7 @@
           <li>입상(개봉): 온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
           <li>발이 후 생육: 온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
         </ul>
-        <p style="color:#9fb0c0; font-size:14px;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
+        <p style="color:#9fb0c0; font-size:calc(14px + var(--inc));">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
       </div>
     </div>
   </aside>
@@ -390,7 +399,6 @@
     function withCacheBuster(url){ const u=new URL(url,location.href); u.searchParams.set("v",Date.now()); return u.toString(); }
 
     function buildComboFile(){
-      // example: mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4
       return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`+
              `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
@@ -423,7 +431,6 @@
 
     // 우선순위: 품질 > 노화(both) > 노화(단일 15/18) > 배지 변화 > 솎기 단독 > 조합영상
     async function updateCompare(){
-      // 노화 both 모드 → 2-up
       if(selAging.value === "both"){
         cmpSingleWrap.style.display = "none";
         cmpDualWrap.style.display   = "grid";
@@ -461,22 +468,20 @@
     }
 
     // buttons
-    playBoth.addEventListener("click", ()=>{
+    document.getElementById("playBoth").addEventListener("click", ()=>{
       try{ stdPlayer.play(); }catch{}
       try{ cmpPlayer.play(); }catch{}
       try{ cmpPlayerA.play(); cmpPlayerB.play(); }catch{}
     });
-    pauseBoth.addEventListener("click", ()=>{
+    document.getElementById("pauseBoth").addEventListener("click", ()=>{
       try{ stdPlayer.pause(); }catch{}
       try{ cmpPlayer.pause(); }catch{}
       try{ cmpPlayerA.pause(); cmpPlayerB.pause(); }catch{}
     });
-    syncTime.addEventListener("click", ()=>{
+    document.getElementById("syncTime").addEventListener("click", ()=>{
       try{
         const t = stdPlayer.currentTime;
-        // 단일 비교
         try{ cmpPlayer.currentTime = t; }catch{}
-        // dual 비교
         try{ cmpPlayerA.currentTime = t; }catch{}
         try{ cmpPlayerB.currentTime = t; }catch{}
       }catch{}
@@ -486,7 +491,7 @@
     [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo, selSubstrate]
       .forEach(el=> el.addEventListener("change", updateCompare));
 
-    // initial load: standard top, compare current selection
+    // initial load
     (async ()=>{
       await loadToPlayer(stdPlayer, stdStatus, STANDARD_PATH);
       await updateCompare();
