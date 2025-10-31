@@ -9,29 +9,22 @@
     :root {
       --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
       --radius:14px;
-      --inc: 5pt; /* ← 전역 폰트 +5pt 증가치 */
+      --inc: 5pt; /* 전역 폰트 +5pt */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       font-family:system-ui, Arial, "Noto Sans KR";
       background:var(--bg); color:var(--text); margin:0;
-      font-size:calc(17px + var(--inc)); /* 기존 17px에 +5pt */
-      line-height:1.55;
-      overflow-x:hidden; /* 좌측 이동으로 인한 가로 스크롤 방지 */
+      font-size:calc(17px + var(--inc)); line-height:1.55;
+      overflow-x:hidden; /* 좌우 이동 시 가로 스크롤 방지 */
     }
 
-    /* ===== 공통 레이아웃: 좌측으로 5cm 이동 ===== */
-    .shift-left{ transform:translateX(-5cm); }
-    @media (max-width: 1024px){
-      .shift-left{ transform:none; } /* 모바일에서는 좌측 이동 미적용 */
-    }
-
-    /* ===== HEADER ===== */
-    header.shift-left{
+    /* ===== HEADER (제목이 잘리지 않도록 이동 제거) ===== */
+    header{
       display:flex; justify-content:space-between; align-items:center;
       gap:12px; padding:10px 16px 8px; border-bottom:1px solid #16202a;
-      will-change: transform;
+      position:relative; z-index:2;
     }
     h1{margin:0; font-size:calc(24px + var(--inc)); letter-spacing:.2px}
     .sub{color:var(--muted); font-size:calc(14px + var(--inc)); margin-top:2px}
@@ -42,22 +35,25 @@
     }
     .btn:hover{border-color:#415e7a}
 
-    /* ===== MAIN GRID (폭은 그대로, 위치만 좌측 이동) ===== */
-    main.shift-left{
+    /* ===== MAIN (본문만 좌측으로 이동, 폭은 유지) ===== */
+    main{
       display:grid;
-      grid-template-columns:minmax(440px, 560px) 1fr; /* 폭 확장 없이 이전 값 유지 */
+      /* 좌측 패널 폭 ↓ 줄이고, 우측 영상 영역 ↑ 넓힘 */
+      grid-template-columns:minmax(320px, 380px) 1fr;
       gap:16px; padding:12px 16px 18px;
       max-width:1600px; margin:0 auto;
-      will-change: transform;
+      transform:translateX(-5cm); /* 본문만 좌측으로 이동 */
+      will-change:transform;
     }
+    /* 큰 화면에서 좌측 패널 약간만 키우되 여전히 슬림 */
     @media (min-width:1400px){
-      main.shift-left{ grid-template-columns: minmax(520px, 640px) 1fr; }
+      main{ grid-template-columns: minmax(380px, 460px) 1fr; }
     }
 
-    /* ===== CARDS / CONTROLS ===== */
+    /* ===== 좌측 컨트롤 카드 ===== */
     .card{
       background:var(--card); padding:18px; border-radius:var(--radius); border:1px solid var(--line);
-      position:sticky; top:8px;
+      position:sticky; top:10px;
     }
     h2{margin:14px 0 10px; font-size:calc(18px + var(--inc))}
     label{font-size:calc(14px + var(--inc)); display:block; margin:10px 0 8px; color:var(--muted)}
@@ -67,14 +63,21 @@
     }
     .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
     .hint{font-size:calc(13.5px + var(--inc)); color:var(--muted); margin-top:12px; line-height:1.55; word-break:break-all}
+
+    /* ===== 우측 영상 카드 (조금 더 시원하게) ===== */
     .stack{display:grid; gap:16px}
     .vcard{padding:14px; border-radius:var(--radius); background:#0e1319; border:1px solid #1e2a36}
     .vtitle{display:flex; align-items:center; gap:8px; margin:4px 0 10px; color:#cfe1f3; font-size:calc(15px + var(--inc))}
     .badge{font-size:calc(12px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
-    video{width:100%; border-radius:12px; background:#000; max-height:52vh}
+    video{
+      width:100%; border-radius:12px; background:#000;
+      max-height:56vh; /* 살짝 키워 더 크게 보이게 */
+    }
     .status{font-size:calc(14px + var(--inc)); color:var(--muted); min-height:1.2em; margin-top:6px}
     .err{color:#f7b5b5}
-    .dual{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+
+    /* 2-up 비교 레이아웃 */
+    .dual{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 
     /* ===== 사이드 패널(매뉴얼) ===== */
     .sidepanel{
@@ -96,15 +99,15 @@
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
 
+    /* 모바일: 좌측 이동 해제, 1컬럼 */
     @media (max-width:1024px){
-      main.shift-left, header.shift-left{ transform:none; }
-      main{grid-template-columns:1fr}
+      main{ transform:none; grid-template-columns:1fr; }
       .card{position:static}
     }
   </style>
 </head>
 <body>
-  <header class="shift-left">
+  <header>
     <div>
       <h1>버섯 생육 시뮬레이션</h1>
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
@@ -117,8 +120,8 @@
     </div>
   </header>
 
-  <main class="shift-left">
-    <!-- 좌측 컨트롤 -->
+  <main>
+    <!-- 좌측 컨트롤 (폭 축소) -->
     <section class="card">
       <h2>Stage1</h2>
       <div class="row">
@@ -279,7 +282,7 @@
       </div>
       <button id="closeManual" class="btn closeX">닫기</button>
     </div>
-    <div class="pcontent">
+  <div class="pcontent">
       <!-- 매뉴얼 -->
       <div id="manual" class="tabpage">
         <div class="stage">
@@ -403,7 +406,7 @@
              `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
     function buildQualityFile(){ return `${selQual.value}.mp4`; }
-    function buildAgingFile(variant){ return `aging-${variant}.mp4`; } // variant: "15" | "18"
+    function buildAgingFile(variant){ return `aging-${variant}.mp4`; } // "15" | "18"
     function buildThinSoloFile(){ return `thinning_${selThinSolo.value}.mp4`; }
     function buildSubstrateFile(){ return `substrate_change.mp4`; }
 
@@ -468,17 +471,17 @@
     }
 
     // buttons
-    document.getElementById("playBoth").addEventListener("click", ()=>{
+    playBoth.addEventListener("click", ()=>{
       try{ stdPlayer.play(); }catch{}
       try{ cmpPlayer.play(); }catch{}
       try{ cmpPlayerA.play(); cmpPlayerB.play(); }catch{}
     });
-    document.getElementById("pauseBoth").addEventListener("click", ()=>{
+    pauseBoth.addEventListener("click", ()=>{
       try{ stdPlayer.pause(); }catch{}
       try{ cmpPlayer.pause(); }catch{}
       try{ cmpPlayerA.pause(); cmpPlayerB.pause(); }catch{}
     });
-    document.getElementById("syncTime").addEventListener("click", ()=>{
+    syncTime.addEventListener("click", ()=>{
       try{
         const t = stdPlayer.currentTime;
         try{ cmpPlayer.currentTime = t; }catch{}
