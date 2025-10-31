@@ -28,6 +28,10 @@
     .badge{font-size:11px; padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
     video{width:100%; border-radius:10px; background:#000; max-height:48vh}
     .status{font-size:13px; color:var(--muted); min-height:1.2em; margin-top:6px}
+    .err{color:#f7b5b5}
+
+    /* 2-up 비교 레이아웃 */
+    .dual{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 
     /* 사이드 패널(매뉴얼) */
     .sidepanel{position:fixed; top:0; right:0; width:420px; max-width:90vw; height:100vh; background:var(--panel); border-left:1px solid #1c2a38;
@@ -143,7 +147,9 @@
           <label for="aging">노화 과정</label>
           <select id="aging">
             <option value="none" selected>—</option>
-            <option value="on">보기</option>
+            <option value="15">aging-15</option>
+            <option value="18">aging-18</option>
+            <option value="both">aging-15 & aging-18 (2-up)</option>
           </select>
         </div>
       </div>
@@ -165,11 +171,23 @@
           </select>
         </div>
       </div>
+      <div class="row">
+        <div>
+          <label for="substrate">배지 변화</label>
+          <select id="substrate">
+            <option value="none" selected>—</option>
+            <option value="on">보기</option>
+          </select>
+        </div>
+        <div></div>
+      </div>
 
       <div class="hint">
         조합 파일: <code>assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4</code><br>
         표준: <code>assets/videos/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4</code><br>
-        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> · 노화: <code>assets/videos/aging/aging.mp4</code><br>
+        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code><br>
+        노화: <code>assets/videos/aging/{aging-15|aging-18}.mp4</code> · 2-up: <code>both</code><br>
+        배지 변화: <code>assets/videos/substrate/substrate_change.mp4</code><br>
         솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code>
       </div>
     </section>
@@ -181,9 +199,21 @@
         <video id="stdPlayer" controls muted autoplay playsinline></video>
         <div id="stdStatus" class="status"></div>
       </div>
-      <div class="vcard">
+
+      <div class="vcard" id="cmpCard">
         <div class="vtitle">비교 플레이어 <span class="badge">선택 조건/모드</span></div>
-        <video id="cmpPlayer" controls muted autoplay playsinline></video>
+
+        <!-- 단일 비교 재생 -->
+        <div id="cmpSingleWrap">
+          <video id="cmpPlayer" controls muted autoplay playsinline></video>
+        </div>
+
+        <!-- 노화 both 재생(2-up) -->
+        <div id="cmpDualWrap" class="dual" style="display:none;">
+          <video id="cmpPlayerA" controls muted autoplay playsinline></video>
+          <video id="cmpPlayerB" controls muted autoplay playsinline></video>
+        </div>
+
         <div id="cmpStatus" class="status"></div>
       </div>
     </section>
@@ -266,9 +296,13 @@
 
     // players
     const stdPlayer = document.getElementById("stdPlayer");
-    const cmpPlayer = document.getElementById("cmpPlayer");
+    const cmpPlayer = document.getElementById("cmpPlayer");    // 단일 비교
+    const cmpPlayerA = document.getElementById("cmpPlayerA");  // dual 좌
+    const cmpPlayerB = document.getElementById("cmpPlayerB");  // dual 우
     const stdStatus = document.getElementById("stdStatus");
     const cmpStatus = document.getElementById("cmpStatus");
+    const cmpSingleWrap = document.getElementById("cmpSingleWrap");
+    const cmpDualWrap   = document.getElementById("cmpDualWrap");
 
     // selectors
     const selS1T = document.getElementById("s1temp");
@@ -281,6 +315,7 @@
     const selAging= document.getElementById("aging");
     const selThinMode = document.getElementById("thinMode");
     const selThinSolo = document.getElementById("thinSolo");
+    const selSubstrate = document.getElementById("substrate");
 
     // buttons
     const playBoth  = document.getElementById("playBoth");
@@ -319,8 +354,9 @@
              `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
     function buildQualityFile(){ return `${selQual.value}.mp4`; }
-    function buildAgingFile(){ return `aging.mp4`; }
+    function buildAgingFile(variant){ return `aging-${variant}.mp4`; } // variant: "15" | "18"
     function buildThinSoloFile(){ return `thinning_${selThinSolo.value}.mp4`; }
+    function buildSubstrateFile(){ return `substrate_change.mp4`; }
 
     async function loadToPlayer(player,statusEl,relPath){
       const url = encodeURI(relPath);
@@ -340,22 +376,73 @@
       return true;
     }
 
-    function buildComparePath(){
-      if(selQual.value!=="none") return `${base}/quality/${buildQualityFile()}`;
-      if(selAging.value==="on")  return `${base}/aging/${buildAgingFile()}`;
-      if(selThinMode.value==="on" && selThinSolo.value!=="none")
-        return `${base}/thinning/${buildThinSoloFile()}`;
-      return `${base}/${buildComboFile()}`;
+    function pathForQuality(){ return `${base}/quality/${buildQualityFile()}`; }
+    function pathForAging(variant){ return `${base}/aging/${buildAgingFile(variant)}`; }
+    function pathForSubstrate(){ return `${base}/substrate/${buildSubstrateFile()}`; }
+
+    // 우선순위: 품질 > 노화(both) > 노화(단일 15/18) > 배지 변화 > 솎기 단독 > 조합영상
+    async function updateCompare(){
+      // 노화 both 모드 → 2-up
+      if(selAging.value === "both"){
+        cmpSingleWrap.style.display = "none";
+        cmpDualWrap.style.display   = "grid";
+
+        const pA = pathForAging("15");
+        const pB = pathForAging("18");
+
+        const okA = await loadToPlayer(cmpPlayerA, cmpStatus, pA);
+        const okB = await loadToPlayer(cmpPlayerB, cmpStatus, pB);
+
+        if(okA && okB){
+          cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
+        }
+        return;
+      }
+
+      // 단일 비교 모드
+      cmpDualWrap.style.display   = "none";
+      cmpSingleWrap.style.display = "block";
+
+      let relPath = "";
+      if(selQual.value !== "none"){
+        relPath = pathForQuality();
+      }else if(selAging.value === "15" || selAging.value === "18"){
+        relPath = pathForAging(selAging.value);
+      }else if(selSubstrate.value === "on"){
+        relPath = pathForSubstrate();
+      }else if(selThinMode.value==="on" && selThinSolo.value!=="none"){
+        relPath = `${base}/thinning/${buildThinSoloFile()}`;
+      }else{
+        relPath = `${base}/${buildComboFile()}`;
+      }
+
+      await loadToPlayer(cmpPlayer, cmpStatus, relPath);
     }
-    async function updateCompare(){ await loadToPlayer(cmpPlayer, cmpStatus, buildComparePath()); }
 
     // buttons
-    playBoth.addEventListener("click", ()=>{ stdPlayer.play(); cmpPlayer.play(); });
-    pauseBoth.addEventListener("click", ()=>{ stdPlayer.pause(); cmpPlayer.pause(); });
-    syncTime.addEventListener("click", ()=>{ try{ cmpPlayer.currentTime = stdPlayer.currentTime; }catch{} });
+    playBoth.addEventListener("click", ()=>{
+      try{ stdPlayer.play(); }catch{}
+      try{ cmpPlayer.play(); }catch{}
+      try{ cmpPlayerA.play(); cmpPlayerB.play(); }catch{}
+    });
+    pauseBoth.addEventListener("click", ()=>{
+      try{ stdPlayer.pause(); }catch{}
+      try{ cmpPlayer.pause(); }catch{}
+      try{ cmpPlayerA.pause(); cmpPlayerB.pause(); }catch{}
+    });
+    syncTime.addEventListener("click", ()=>{
+      try{
+        const t = stdPlayer.currentTime;
+        // 단일 비교
+        try{ cmpPlayer.currentTime = t; }catch{}
+        // dual 비교
+        try{ cmpPlayerA.currentTime = t; }catch{}
+        try{ cmpPlayerB.currentTime = t; }catch{}
+      }catch{}
+    });
 
     // change events
-    [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo]
+    [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo, selSubstrate]
       .forEach(el=> el.addEventListener("change", updateCompare));
 
     // initial load: standard top, compare current selection
@@ -366,4 +453,3 @@
   </script>
 </body>
 </html>
-
