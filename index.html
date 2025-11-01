@@ -107,6 +107,37 @@
 
     .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
     .err{color:#f7b5b5}
+let autoplayUnlocked = false;
+
+async function unlockAutoplay() {
+  if (autoplayUnlocked) return;
+  autoplayUnlocked = true;
+  const players = [stdPlayer, cmpPlayer, cmpPlayerA, cmpPlayerB].filter(Boolean);
+  for (const p of players) {
+    try {
+      // iOS/모바일 대응: 속성도 강제로 보장
+      p.muted = true;
+      p.setAttribute('muted', '');
+      p.setAttribute('playsinline', '');
+      p.setAttribute('webkit-playsinline', '');
+      p.autoplay = true;
+
+      await p.play();
+    } catch (e) {
+      // 재생 거부되면 상태 메시지로 사용자에게 버튼 클릭 안내
+      // (필요시 각 상태 영역에 개별 문구 넣어도 됩니다)
+    }
+  }
+}
+
+// 페이지 어디든 첫 인터액션 1회에 한해 해제
+['pointerdown','keydown','touchstart'].forEach(evt=>{
+  window.addEventListener(evt, unlockAutoplay, { once:true, passive:true });
+});
+
+// 기존 재생/동기화/매뉴얼 버튼에도 보강(사용자가 이 버튼을 누르면 확실히 풀림)
+playBoth.addEventListener('click', unlockAutoplay, { once:true });
+openManual.addEventListener('click', unlockAutoplay, { once:true });
 
     /* ===== 사이드 패널(표준 매뉴얼) - 활성화 ===== */
     .sidepanel{
@@ -286,7 +317,7 @@
         <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
         <div class="vmedia">
           <div class="vw">
-            <video id="stdPlayer" controls muted autoplay playsinline></video>
+            <video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
           </div>
         </div>
         <div id="stdStatus" class="status"></div>
@@ -297,12 +328,12 @@
         <div class="vmedia">
           <!-- 단일 비교 -->
           <div id="cmpSingleWrap" class="vw">
-            <video id="cmpPlayer" controls muted autoplay playsinline></video>
+            <video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
           </div>
           <!-- 2-up 비교 -->
           <div id="cmpDualWrap" style="display:none;">
-            <video id="cmpPlayerA" controls muted autoplay playsinline></video>
-            <video id="cmpPlayerB" controls muted autoplay playsinline></video>
+            <video id="cmpPlayerA" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
+            <video id="cmpPlayerB" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
           </div>
         </div>
         <div id="cmpStatus" class="status"></div>
@@ -445,7 +476,7 @@
     const buildThinSoloFile= () => `thinning_${selThinSolo.value}.mp4`;
     const buildSubstrateFile = () => `substrate_change.mp4`;
 
-    async function loadToPlayer(player,statusEl,relPath){
+    async function loadToPlayer(player, statusEl, relPath){
       const url = encodeURI(relPath);
       const ok = await fileExists(url);
       if(!ok){
@@ -453,15 +484,31 @@
         try{player.pause();}catch{}
         player.removeAttribute("src"); player.load(); return false;
       }
+
       try{player.pause();}catch{}
       player.removeAttribute("src"); player.load();
+   
+      // 🔑 자동재생 우호 속성 보강 (src 설정 전)
+      player.muted = true;
+      player.setAttribute('muted','');
+      player.setAttribute('playsinline','');
+      player.setAttribute('webkit-playsinline','');
+      player.autoplay = true;
+      
       player.src = withCacheBuster(url);
-      player.muted=true; player.playsInline=true;
+      
       player.onerror = ()=>{ statusEl.innerHTML = `<span class="err">재생 오류: <code>${relPath}</code></span>`; };
       player.oncanplay = ()=>{ statusEl.textContent = `재생 중: ${relPath}`; };
-      try{ await player.play(); }catch{ statusEl.innerHTML = `자동재생이 차단됨 → <b>재생</b> 버튼 클릭: <code>${relPath}</code>`; }
+      
+      // 최초 제스처 이전엔 play()가 거부될 수 있음 → 실패 시 안내 문구 유지 
+      try{
+        await player.play();
+      }catch{
+        statusEl.innerHTML = `자동재생이 차단됨 → 상단 <b>둘다 재생</b> 버튼을 한 번 눌러주세요: <code>${relPath}</code>`;
+      }
       return true;
     }
+
 
     const pathForQuality  = () => `${base}/quality/${buildQualityFile()}`;
     const pathForAging    = v => `${base}/aging/${buildAgingFile(v)}`;
@@ -529,3 +576,4 @@
   </script>
 </body>
 </html>
+
