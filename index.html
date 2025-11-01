@@ -418,7 +418,7 @@
         </div>
         <div class="stage">
           <h3>③ 솎기</h3>
-          <div class="imgs"><img src="assets/솎기.JPG" alt="솎기"></div>
+          <div class="imgs"><img src="assets/솎기_1.JPG" alt="솎기"></div>
           <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아 균일 생육 확보</span></div>
         </div>
         <div class="stage">
@@ -440,7 +440,7 @@
         <h3>기본 환경조건</h3>
         <ul>
           <li>입상(개봉): 온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
-          <li>발이 후 생육: 온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
+          <li>발이 후 생육: 온도 15±2℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
         </ul>
         <p style="color:#9fb0c0;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
       </div>
@@ -450,142 +450,114 @@
   <script>
     const base = "assets/videos";
     const STANDARD_ID = "mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4";
-    const STANDARD_PATH = `${base}/${STANDARD_ID}`;
+    const STANDARD_PATH = `${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`;
 
     // players
-    const stdPlayer = document.getElementById("stdPlayer");
-    const cmpPlayer = document.getElementById("cmpPlayer");
-    const cmpPlayerA = document.getElementById("cmpPlayerA");
-    const cmpPlayerB = document.getElementById("cmpPlayerB");
-    const stdStatus = document.getElementById("stdStatus");
-    const cmpStatus = document.getElementById("cmpStatus");
+    const stdPlayer   = document.getElementById("stdPlayer");
+    const cmpPlayer   = document.getElementById("cmpPlayer");
+    const cmpPlayerA  = document.getElementById("cmpPlayerA");
+    const cmpPlayerB  = document.getElementById("cmpPlayerB");
+    const stdStatus   = document.getElementById("stdStatus");
+    const cmpStatus   = document.getElementById("cmpStatus");
     const cmpSingleWrap = document.getElementById("cmpSingleWrap");
     const cmpDualWrap   = document.getElementById("cmpDualWrap");
 
-    // 🔓 자동재생 해제 루틴 (최초 사용자 제스처 1회)
+    /* ---------- 자동재생 해제 루틴 ---------- */
     let autoplayUnlocked = false;
-    async function unlockAutoplay() {
+    async function unlockAutoplay(){
       if (autoplayUnlocked) return;
       autoplayUnlocked = true;
-      const players = [stdPlayer, cmpPlayer, cmpPlayerA, cmpPlayerB].filter(Boolean);
-      for (const p of players) {
+      const list = [stdPlayer, cmpPlayer, cmpPlayerA, cmpPlayerB].filter(Boolean);
+      for (const p of list){
         try {
-          p.muted = true; p.setAttribute('muted','');
-          p.setAttribute('playsinline',''); p.setAttribute('webkit-playsinline','');
+          p.muted = true;
+          p.setAttribute('muted','');
+          p.setAttribute('playsinline','');
+          p.setAttribute('webkit-playsinline','');
           p.autoplay = true;
           await p.play();
-        } catch (_) {}
+        } catch {}
       }
     }
-    // 어디든 첫 인터랙션에서 1회 해제
-    ['pointerdown','keydown','touchstart','visibilitychange'].forEach(evt=>{
-      window.addEventListener(evt, unlockAutoplay, { once:true, passive:true });
-    });
+    ['pointerdown','keydown','touchstart','visibilitychange']
+      .forEach(evt=>window.addEventListener(evt,unlockAutoplay,{once:true,passive:true}));
 
-    // selectors
-    const selS1T = document.getElementById("s1temp");
-    const selS1L = document.getElementById("s1light");
-    const selS1H = document.getElementById("s1hum");
-    const selS2T = document.getElementById("s2temp");
-    const selS2H = document.getElementById("s2hum");
-    const selS2L = document.getElementById("s2light");
-    const selQual = document.getElementById("quality");
-    const selAging= document.getElementById("aging");
-    const selThinMode = document.getElementById("thinMode");
-    const selThinSolo = document.getElementById("thinSolo");
-    const selSubstrate = document.getElementById("substrate");
+    /* =====================================================
+       ✅ 패치1: HEAD 실패 시 대안경로 및 강제로드 지원
+    ===================================================== */
+    function logStatus(msg){ try{console.log("[MUSHROOM]",msg);}catch{} }
 
-    // buttons
-    const playBoth  = document.getElementById("playBoth");
-    const pauseBoth = document.getElementById("pauseBoth");
-    const syncTime  = document.getElementById("syncTime");
-    const openManual = document.getElementById("openManual");
-    openManual.addEventListener('click', unlockAutoplay, { once:true });
-    playBoth.addEventListener('click', unlockAutoplay, { once:true });
-
-    // 토글 스위치
-    const extrasPinSwitch = document.getElementById("extrasPinSwitch");
-    let extrasPinned = false;
-    extrasPinSwitch.addEventListener("change", ()=>{
-      extrasPinned = extrasPinSwitch.checked;
-      updateCompare();
-    });
-
-    // ===== 사이드 패널(표준 매뉴얼) 활성화 =====
-    const panel = document.getElementById("panel");
-    const closeManual = document.getElementById("closeManual");
-    openManual.addEventListener("click", ()=>{
-      panel.classList.add("open");
-      panel.setAttribute("aria-hidden","false");
-    });
-    closeManual.addEventListener("click", ()=>{
-      panel.classList.remove("open");
-      panel.setAttribute("aria-hidden","true");
-    });
-
-    // 탭 전환
-    document.querySelectorAll(".sidepanel .tab").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        document.querySelectorAll(".sidepanel .tab").forEach(b=>b.classList.remove("active"));
-        btn.classList.add("active");
-        document.querySelectorAll(".sidepanel .tabpage").forEach(p=>p.style.display="none");
-        document.getElementById(btn.dataset.tab).style.display="block";
-      });
-    });
-
-    // HEAD 캐시
     const existsCache = new Map();
-    async function fileExists(url){
-      if(existsCache.has(url)) return existsCache.get(url);
-      try{ const r=await fetch(url,{method:"HEAD"}); existsCache.set(url,r.ok); return r.ok; }
-      catch{ existsCache.set(url,false); return false; }
+    async function fileExistsSmart(relPath){
+      const url = encodeURI(relPath);
+      if (existsCache.has(url)) return existsCache.get(url);
+
+      try{
+        const r = await fetch(url,{method:"HEAD",cache:"no-store"});
+        if (r.ok){ existsCache.set(url,true); return true; }
+      }catch(e){}
+
+      // 대문자 확장자
+      if (url.endsWith(".mp4")){
+        const alt = url.slice(0,-4)+".MP4";
+        try{
+          const r2 = await fetch(alt,{method:"HEAD",cache:"no-store"});
+          if (r2.ok){ existsCache.set(alt,true); return alt; }
+        }catch(e){}
+      }
+      // converted/ 폴더 탐색
+      if (!/\/converted\//.test(url)){
+        const conv = url.replace("/aging/","/aging/converted/");
+        try{
+          const r3 = await fetch(conv,{method:"HEAD",cache:"no-store"});
+          if (r3.ok){ existsCache.set(conv,true); return conv; }
+        }catch(e){}
+      }
+      // HEAD 실패 시 강제 로드
+      existsCache.set(url,"force");
+      return "force";
     }
-    const withCacheBuster = url => {
-      const u=new URL(url,location.href); u.searchParams.set("v",Date.now()); return u.toString();
+
+    const withCacheBuster = abs=>{
+      const u=new URL(abs,location.href); u.searchParams.set("v",Date.now()); return u.toString();
     };
 
-    function buildComboFile(){
-      return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`+
-             `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
-    }
-    const buildQualityFile   = () => `${selQual.value}.mp4`;
-    const buildAgingFile     = v => `aging-${v}.mp4`;
-    const buildThinSoloFile  = () => `thinning_${selThinSolo.value}.mp4`;
-    const buildSubstrateFile = () => `substrate_change.mp4`;
+    async function loadToPlayer(player,statusEl,relPath){
+      let url=relPath;
+      const test=await fileExistsSmart(relPath);
 
-    async function loadToPlayer(player, statusEl, relPath){
-      const url = encodeURI(relPath);
-      const ok = await fileExists(url);
-      if(!ok){
-        statusEl.innerHTML = `<span class="err">파일을 찾을 수 없습니다 (404): <code>${relPath}</code></span>`;
-        try{player.pause();}catch{}
-        player.removeAttribute("src"); player.load(); return false;
+      if(test===true){
+        // ok 그대로
+      }else if(typeof test==="string" && test!=="force"){
+        url=test;
+      }else if(test==="force"){
+        logStatus(`HEAD 실패 → 강제 로드: ${relPath}`);
+      }else{
+        statusEl.innerHTML=`<span class="err">파일 없음: <code>${relPath}</code></span>`;
+        try{player.pause();}catch{} player.removeAttribute("src"); player.load(); return false;
       }
 
       try{player.pause();}catch{}
       player.removeAttribute("src"); player.load();
-
-      // 자동재생 우호 속성 보강 (src 설정 전)
-      player.muted = true;
+      player.muted=true;
       player.setAttribute('muted','');
       player.setAttribute('playsinline','');
       player.setAttribute('webkit-playsinline','');
-      player.autoplay = true;
+      player.autoplay=true;
 
-      player.src = withCacheBuster(url);
+      const finalUrl=withCacheBuster(url);
+      player.src=finalUrl;
 
-      player.onerror = ()=>{ statusEl.innerHTML = `<span class="err">재생 오류: <code>${relPath}</code></span>`; };
-      player.oncanplay = ()=>{ statusEl.textContent = `재생 중: ${relPath}`; };
+      player.onerror=()=>{statusEl.innerHTML=`<span class="err">재생 오류: <code>${finalUrl}</code></span>`;logStatus(`onerror:${finalUrl}`);};
+      player.oncanplay=()=>{statusEl.textContent=`재생 중: ${finalUrl}`;logStatus(`oncanplay:${finalUrl}`);};
 
-      try{ await player.play(); }
-      catch{
-        statusEl.innerHTML = `자동재생이 차단됨 → 상단 <b>둘다 재생</b> 버튼을 한 번 눌러주세요: <code>${relPath}</code>`;
-      }
+      try{await player.play();}
+      catch{statusEl.innerHTML=`자동재생 차단됨 → 상단 <b>둘다 재생</b> 클릭: <code>${finalUrl}</code>`;logStatus(`autoplay blocked:${finalUrl}`);}
       return true;
     }
 
     const pathForQuality   = () => `${base}/quality/${buildQualityFile()}`;
-    const pathForAging     = v => `${base}/aging/${buildAgingFile(v)}`;
+    const pathForAging=v=>`${base}/aging/aging-${v}.mp4`;
     const pathForSubstrate = () => `${base}/substrate/${buildSubstrateFile()}`;
 
     // 우선순위: 품질 > 노화(both) > 노화(단일) > 배지 변화 > 솎기 단독 > 조합
@@ -681,8 +653,8 @@
       .forEach(el=> el.addEventListener("change", updateCompare));
 
     // 초기 로드
-    (async ()=>{
-      await loadToPlayer(stdPlayer, stdStatus, STANDARD_PATH);
+    (async()=>{
+      await loadToPlayer(stdPlayer,stdStatus,STANDARD_PATH);
       await updateCompare();
     })();
   </script>
