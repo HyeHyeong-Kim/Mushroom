@@ -1,751 +1,208 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>버섯 생육 시뮬레이션 뷰어 (Patch 1)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
-      --radius:14px; --inc:5pt;
-      --header-h:72px; --gap:12px;
-
-      /* 요구사항 반영 */
-      --left-col: 15cm;     /* 좌측 패널 폭 고정 */
-      --left-gap: 1cm;      /* 페이지 왼쪽 여백 */
-      --page-pad: 48px;     /* 그리드 여유 패딩(우측) */
-
-      /* 플레이어 가로폭: 20–25cm에서 22cm 선호 */
-      --video-w: clamp(20cm, 22cm, 25cm);
-
-      /* 안전 폭: 뷰포트에서 좌측 패널+여백+패딩 제외 */
-      --safe-w: calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:system-ui, Arial, "Noto Sans KR";
-      font-size:calc(17px + var(--inc)); line-height:1.5;
-      overflow:hidden; /* 한 화면 수납 */
-    }
-
-    /* ===== Header ===== */
-    header{
-      height:var(--header-h);
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
-    }
-    h1{margin:0; font-size:calc(27px + var(--inc))}
-    .sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
-    .toolbar{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
-      padding:8px 12px; border-radius:12px; border:1px solid #2a3847;
-      background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc));
-    }
-    .btn:hover{border-color:#415e7a}
-
-    /* 추가 보기 헤더 + 토글 스위치 (ON/OFF 텍스트 포함, 정렬 보정) */
-    .extrasHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin:8px 0 6px;
-    }
-    .extrasToggle{
-      display:flex; align-items:center; gap:10px; user-select:none;
-      font-size:calc(12px + var(--inc)); color:var(--muted);
-    }
-    .extrasToggle .labelText{ white-space:nowrap; }
-    .extrasToggle .switch{ position:relative; width:64px; height:28px; flex:0 0 auto; }
-    .extrasToggle .switch input{
-      appearance:none; -webkit-appearance:none; outline:none; cursor:pointer;
-      position:absolute; inset:0; margin:0; padding:0; background:transparent; border:0; z-index:3;
-    }
-    .extrasToggle .switch .track{
-      position:absolute; inset:0; border-radius:999px; background:#2a3847; border:1px solid #3a556e;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:0 8px; box-sizing:border-box; color:#cfe3f7; font-size:11px; font-weight:600;
-      transition:background-color .2s, border-color .2s; z-index:1;
-    }
-    .extrasToggle .switch .state.off{ opacity:1; }
-    .extrasToggle .switch .state.on { opacity:.45; }
-    .extrasToggle .switch .thumb{
-      position:absolute; top:50%; left:3px; width:22px; height:22px; border-radius:50%;
-      background:#ffffff; transform:translateY(-50%); box-shadow:0 2px 6px rgba(0,0,0,.25);
-      transition:left .2s ease; z-index:2;
-    }
-    .extrasToggle .switch input:checked ~ .track{ background:#2b4e68; border-color:#4fa3d1; }
-    .extrasToggle .switch input:checked ~ .track .state.off{ opacity:.45; }
-    .extrasToggle .switch input:checked ~ .track .state.on { opacity:1; }
-    .extrasToggle .switch input:checked ~ .thumb{ left: calc(100% - 3px - 22px); }
-
-    .extrasHint{
-      font-size:12px; color:var(--muted);
-      margin-top:2px; margin-bottom:10px; line-height:1.4;
-    }
-
-    /* ===== Main 레이아웃 ===== */
-    main{
-      height:calc(100vh - var(--header-h));
-      display:grid;
-      grid-template-columns: var(--left-col) 1fr;
-      gap:var(--gap);
-      padding:var(--gap) 16px var(--gap) 16px;
-      padding-left: calc(16px + var(--left-gap));  /* 왼쪽 여백 1cm */
-      align-items:stretch;
-      min-width: 0;
-    }
-
-    /* ===== 좌측 컨트롤 ===== */
-    .card{
-      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-      padding:12px; overflow:auto; min-height:0;
-    }
-    h2{margin:8px 0 8px; font-size:calc(16px + var(--inc))}
-    label{font-size:calc(12px + var(--inc)); display:block; margin:8px 0 6px; color:var(--muted)}
-    select{
-      width:100%; padding:8px 10px; border-radius:10px;
-      background:#0f141a; color:#fff; border:1px solid #2a3847; font-size:calc(13px + var(--inc));
-    }
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .hint{font-size:calc(11px + var(--inc)); color:var(--muted); margin-top:8px; line-height:1.45; word-break:break-all}
-
-    /* ===== 우측 영상 스택 ===== */
-    .stack{
-      display:grid; gap:var(--gap);
-      grid-template-rows: 1fr 1fr; /* 위/아래 균등 배분 */
-      min-height:0;
-    }
-    .vcard{
-      background:#0e1319; border:1px solid #1e2a36; border-radius:var(--radius);
-      padding:8px; display:flex; flex-direction:column; min-height:0;
-    }
-    .vtitle{display:flex; align-items:center; gap:8px; margin:0 0 6px; color:#cfe1f3; font-size:calc(13px + var(--inc))}
-    .badge{font-size:calc(10px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
-
-    .vmedia{ flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch; overflow:hidden; }
-    .vw{
-      width:var(--video-w);
-      max-width:var(--safe-w);
-      height:100%; /* 칸 높이에 맞춤 */
-      display:block;
-      position: relative;
-      left: 0; /* 칸 밖으로 밀리지 않도록 0으로 보정 */
-    }
-    .vw video{
-      width:100%; height:100%;
-      border-radius:10px; background:#000; object-fit:contain;
-    }
-
-    /* dual 모드 영상도 칸 안에 맞추기 */
-    #cmpDualWrap video{
-      width:100%; height:100%;
-      object-fit:contain; background:#000; border-radius:10px;
-    }
-
-    /* 2-up 비교 (aging both) */
-    #cmpDualWrap{
-      display:grid; grid-template-columns:1fr 1fr; gap:var(--gap);
-      width:var(--video-w); max-width:var(--safe-w);
-      height:100%; /* vmedia 영역을 꽉 채우되 내부 영상은 object-fit:contain */
-      position: relative; left: 0; /* 칸 밖으로 나가지 않도록 보정 */
-      margin:0 auto;
-    }
-
-    .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
-
-    /* ===== 사이드 패널(표준 매뉴얼) ===== */
-    .sidepanel{
-      position:fixed; top:0; right:0; width:460px; max-width:92vw; height:100vh; background:var(--panel);
-      border-left:1px solid #1c2a38; transform:translateX(100%); transition:.28s ease;
-      display:flex; flex-direction:column; z-index:50; pointer-events:auto;
-    }
-    .sidepanel.open{transform:translateX(0)}
-    .phead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-bottom:1px solid #1c2a38}
-    .tabs{display:flex; gap:8px}
-    .tab{
-      padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38;
-      color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc));
-    }
-    .tab.active{background:#1b2735; border-color:#35506d}
-    .pcontent{padding:12px 14px; overflow:auto; flex:1}
-    .stage{margin-bottom:12px; border:1px solid #1f2b38; border-radius:12px; padding:10px; background:#0c1117}
-    .stage h3{margin:0 0 6px; font-size:calc(14px + var(--inc))}
-    .imgs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px}
-    .imgs img{width:100%; height:120px; object-fit:cover; border-radius:10px; border:1px solid #25374a}
-    .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:calc(12px + var(--inc)); color:#b1c0cf; margin-top:4px}
-    .kv b{color:#e8f1f8}
-    .closeX{padding:6px 10px}
-  
-    /* 우측 하단 도킹된 브랜드 영역 (중앙 정렬 + 로고 3배) */
-    .brandDock{
-      position:fixed; right:16px; bottom:16px; z-index:60;
-      display:flex; align-items:center; gap:12px;
-      background:rgba(20,26,32,0.85); border:1px solid #2a3847;
-      padding:8px 12px; border-radius:12px; backdrop-filter:blur(2px);
-    }
-    .brandName{
-      font-weight:800;
-      font-size:calc(14px + var(--inc) + 3px);
-      color:#e9f0f5; white-space:nowrap; line-height:1.1; text-align:center;
-    }
-    .brandLogo{
-      height:114px; width:auto; border-radius:6px; object-fit:contain;
-    }
-  
-    /* 작은 화면 대응 */
-    @media (max-width: 1200px){
-      body{ overflow:auto; }
-      main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
-      .stack{ grid-template-rows:auto; }
-      .vw{ width:100%; max-width:100%; left:0; }
-      #cmpDualWrap{ left:0; width:100%; max-width:100%; height:100%; }
-    }
-      main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
-      .stack{ grid-template-rows:auto; }
-      .vw{ width:100%; max-width:100%; left:0; }
-      #cmpDualWrap{ left:0; width:100%; max-width:100%; }
-    }
-  </style>
+<meta charset="utf-8" />
+<title>버섯 생육 시뮬레이션 뷰어 (Patch 1 Fixed)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
+  --radius:14px; --inc:5pt; --header-h:72px; --gap:12px;
+  --left-col:15cm; --left-gap:1cm; --page-pad:48px;
+  --video-w:clamp(20cm,22cm,25cm);
+  --safe-w:calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:system-ui,"Noto Sans KR";
+  overflow:hidden;
+}
+/* header */
+header{height:var(--header-h);display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;border-bottom:1px solid #16202a;}
+h1{margin:0;font-size:calc(27px + var(--inc));}
+.sub{color:var(--muted);font-size:14px;}
+.toolbar{display:flex;gap:8px;}
+.btn{padding:8px 12px;border-radius:10px;border:1px solid #2a3847;background:#0f141a;color:#fff;cursor:pointer;}
+.btn:hover{border-color:#415e7a;}
+main{
+  display:grid;
+  grid-template-columns:var(--left-col) 1fr;
+  height:calc(100vh - var(--header-h));
+  gap:var(--gap);padding:var(--gap) 16px;
+  padding-left:calc(16px + var(--left-gap));
+}
+/* 좌측 패널 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;overflow:auto;}
+h2{margin:8px 0;font-size:calc(16px + var(--inc));}
+label{color:var(--muted);font-size:14px;}
+select{width:100%;padding:6px 8px;border-radius:8px;background:#0f141a;color:#fff;border:1px solid #2a3847;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+/* 중앙 플레이어 */
+.stack{display:grid;grid-template-rows:1fr 1fr;gap:var(--gap);overflow:hidden;}
+.vcard{background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);padding:8px;display:flex;flex-direction:column;}
+.vtitle{color:#cfe1f3;margin-bottom:4px;font-size:15px;}
+.vmedia{
+  flex:1;display:flex;justify-content:center;align-items:center;
+  height:40vh; /* 두 영상 높이 동일 고정 */
+  overflow:hidden;
+}
+.vw{
+  width:var(--video-w);max-width:var(--safe-w);
+  height:100%;
+  margin:0 auto;
+  display:flex;justify-content:center;align-items:center;
+}
+.vw video{
+  width:100%;height:100%;
+  object-fit:contain;background:#000;border-radius:10px;
+}
+/* dual */
+#cmpDualWrap{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);
+  width:var(--video-w);max-width:var(--safe-w);
+  margin:0 auto;height:100%;
+}
+.status{font-size:13px;color:var(--muted);min-height:1.2em;}
+/* 매뉴얼 패널 */
+.sidepanel{position:fixed;top:0;right:0;width:460px;max-width:90vw;height:100vh;
+  background:var(--panel);border-left:1px solid #1c2a38;transform:translateX(100%);
+  transition:.3s;display:flex;flex-direction:column;z-index:50;}
+.sidepanel.open{transform:translateX(0);}
+.pcontent{padding:10px;overflow:auto;flex:1;}
+.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a;}
+/* 로고 */
+.brandDock{position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;
+background:rgba(20,26,32,.85);border:1px solid #2a3847;padding:8px 12px;border-radius:10px;}
+.brandName{font-weight:800;font-size:18px;}
+.brandLogo{height:110px;object-fit:contain;}
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>버섯 생육 시뮬레이션</h1>
-      <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
+<header>
+  <div>
+    <h1>버섯 생육 시뮬레이션</h1>
+    <div class="sub">상단: 표준 자동재생 · 하단: 선택 비교 · 우측: 표준 매뉴얼</div>
+  </div>
+  <div class="brandDock"><span class="brandName">경기도농업기술원</span><img src="assets/경기도심볼.jpg" class="brandLogo"/></div>
+  <div class="toolbar">
+    <button id="openManual" class="btn">매뉴얼</button>
+    <button id="playBoth" class="btn">둘다 재생</button>
+    <button id="pauseBoth" class="btn">둘다 정지</button>
+    <button id="syncTime" class="btn">동기화</button>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <!-- 기존 환경설정 그대로 -->
+    <h2>Stage1</h2>
+    <div class="row">
+      <div><label>온도</label><select id="s1temp"><option>13</option><option selected>18</option><option>23</option></select></div>
+      <div><label>광</label><select id="s1light"><option selected>on</option><option>off</option></select></div>
     </div>
-
-    <!-- 우측 하단 도킹(고정 요소이므로 header 안/밖 상관없음) -->
-    <div class="brandDock" aria-label="기관 표기">
-      <span class="brandName">경기도농업기술원</span>
-      <img src="assets/경기도심볼.jpg" alt="경기도 로고" class="brandLogo" />
+    <h2>Stage2</h2>
+    <div class="row">
+      <div><label>온도</label><select id="s2temp"><option>15</option><option selected>18</option></select></div>
+      <div><label>습도</label><select id="s2hum"><option>60</option><option selected>80</option><option>90</option></select></div>
     </div>
-
-    <div class="toolbar">
-      <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
-      <button id="playBoth" class="btn" type="button">둘다 재생</button>
-      <button id="pauseBoth" class="btn" type="button">둘다 정지</button>
-      <button id="syncTime" class="btn" type="button">동기화</button>
+    <h2>추가 보기</h2>
+    <div class="row">
+      <div><label>품질</label><select id="quality"><option value="none" selected>—</option><option value="quality_excellent">특상</option></select></div>
+      <div><label>노화</label><select id="aging"><option value="none" selected>—</option><option value="15">aging-15</option><option value="18">aging-18</option><option value="both">aging-both</option></select></div>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <!-- 좌측 컨트롤 (15cm + 좌 여백 1cm) -->
-    <section class="card" aria-label="환경 설정">
-      <h2>Stage1</h2>
-      <div class="row">
-        <div>
-          <label for="s1temp">온도(°C)</label>
-          <select id="s1temp">
-            <option value="13">13</option>
-            <option value="18" selected>18</option>
-            <option value="23">23</option>
-          </select>
-        </div>
-        <div>
-          <label for="s1light">광</label>
-          <select id="s1light">
-            <option value="on" selected>on</option>
-            <option value="off">off</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="s1hum">습도(%)</label>
-          <select id="s1hum" disabled>
-            <option value="90" selected>90</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-
-      <h2>Stage2</h2>
-      <div class="row">
-        <div>
-          <label for="s2temp">온도(°C)</label>
-          <select id="s2temp">
-            <option value="15">15</option>
-            <option value="18" selected>18</option>
-          </select>
-        </div>
-        <div>
-          <label for="s2hum">습도(%)</label>
-          <select id="s2hum">
-            <option value="60">60</option>
-            <option value="80" selected>80</option>
-            <option value="90">90</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="s2light">광</label>
-          <select id="s2light">
-            <option value="on" selected>on</option>
-            <option value="off">off</option>
-          </select>
-        </div>
-        <div>
-          <label>솎기(조합용)</label>
-          <select id="thinning" disabled>
-            <option value="10" selected>10</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- ▶ 추가 보기 (환경조건 무관) 헤더 + 토글 + 안내문구 -->
-      <div class="extrasHeader">
-        <h2 style="margin:0;">추가 보기 (환경조건 무관)</h2>
-        <label class="extrasToggle">
-          <span class="labelText">비교에 적용</span>
-          <div class="switch">
-            <input type="checkbox" id="extrasPinSwitch" />
-            <div class="track">
-              <span class="state off">OFF</span>
-              <span class="state on">ON</span>
-            </div>
-            <div class="thumb" aria-hidden="true"></div>
-          </div>
-        </label>
-      </div>
-      <p class="extrasHint">
-        OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교
-      </p>
-
-      <div class="row">
-        <div>
-          <label for="quality">품질 등급</label>
-          <select id="quality">
-            <option value="none" selected>—</option>
-            <option value="quality_excellent">특상 (excellent)</option>
-            <option value="quality_high">상 (high)</option>
-            <option value="quality_normal">보통 (normal)</option>
-          </select>
-        </div>
-        <div>
-          <label for="aging">노화 과정</label>
-          <select id="aging">
-            <option value="none" selected>—</option>
-            <option value="15">aging-15</option>
-            <option value="18">aging-18</option>
-            <option value="both">aging-15 & aging-18 (2-up)</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="thinMode">솎기 단독 모드</label>
-          <select id="thinMode">
-            <option value="off" selected>—</option>
-            <option value="on">보기</option>
-          </select>
-        </div>
-        <div>
-          <label for="thinSolo">솎기(단독)</label>
-          <select id="thinSolo">
-            <option value="none">none</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="substrate">배지 변화</label>
-          <select id="substrate">
-            <option value="none" selected>—</option>
-            <option value="on">보기</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-
-      <div class="hint">
-        조합: <code>assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4</code><br>
-        표준: <code>assets/videos/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4</code><br>
-        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code> ·
-        노화: <code>assets/videos/aging/{aging-15|aging-18}.mp4</code> · 2-up: both<br>
-        배지 변화: <code>assets/videos/substrate/substrate_change.mp4</code> ·
-        솎기 단독: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code>
-      </div>
-    </section>
-
-    <!-- 우측: 상단 기준 / 하단 비교 -->
-    <section class="stack">
-      <div class="vcard">
-        <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
-        <div class="vmedia">
-          <div class="vw">
-            <video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-        </div>
-        <div id="stdStatus" class="status"></div>
-      </div>
-
-      <div class="vcard" id="cmpCard">
-        <div class="vtitle">비교 플레이어 <span class="badge">선택 조건/모드</span></div>
-        <div class="vmedia">
-          <!-- 단일 비교 -->
-          <div id="cmpSingleWrap" class="vw">
-            <video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-          <!-- 2-up 비교 -->
-          <div id="cmpDualWrap" style="display:none;">
-            <video id="cmpPlayerA" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-            <video id="cmpPlayerB" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-        </div>
-        <div id="cmpStatus" class="status"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===== 표준 매뉴얼(사이드 패널) ===== -->
-  <aside id="panel" class="sidepanel" aria-hidden="true">
-    <div class="phead">
-      <strong>표준 매뉴얼</strong>
-      <div class="tabs">
-        <button class="tab active" data-tab="manual" type="button">매뉴얼</button>
-        <button class="tab" data-tab="env" type="button">환경조건</button>
-      </div>
-      <button id="closeManual" class="btn closeX" type="button">닫기</button>
+  <section class="stack">
+    <div class="vcard">
+      <div class="vtitle">기준 플레이어</div>
+      <div class="vmedia"><div class="vw"><video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video></div></div>
+      <div id="stdStatus" class="status"></div>
     </div>
+    <div class="vcard">
+      <div class="vtitle">비교 플레이어</div>
+      <div class="vmedia">
+        <div id="cmpSingleWrap" class="vw"><video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video></div>
+        <div id="cmpDualWrap" style="display:none;">
+          <video id="cmpPlayerA" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
+          <video id="cmpPlayerB" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
+        </div>
+      </div>
+      <div id="cmpStatus" class="status"></div>
+    </div>
+  </section>
+
+  <aside id="panel" class="sidepanel">
     <div class="pcontent">
-      <!-- 기본 활성 탭: manual -->
-      <div id="manual" class="tabpage" style="display:block;">
-        <div class="stage">
-          <h3>① 입상(개봉)</h3>
-          <div class="imgs">
-            <!-- 파일명이 공백이면 %20 인코딩 필요 / 실제 파일명과 일치시켜 주세요 -->
-            <img src="assets/입상(개봉) 1.jpg" alt="입상(개봉) 1">
-            <img src="assets/입상(개봉) 2.jpg" alt="입상(개봉) 2">
-          </div>
-          <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
-          <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
-        </div>
-        <div class="stage">
-          <h3>② 발이 후 생육</h3>
-          <div class="imgs"><img src="assets/발이 후 생육.jpg" alt="발이 후 생육"></div>
-          <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기</span></div>
-          <div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div>
-        </div>
-        <div class="stage">
-          <h3>③ 솎기</h3>
-          <div class="imgs"><img src="assets/솎기_1.JPG" alt="솎기"></div>
-          <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아 균일 생육 확보</span></div>
-        </div>
-        <div class="stage">
-          <h3>④ 솎기 후 생육</h3>
-          <div class="imgs">
-            <img src="assets/솎기 후 생육_1.jpg" alt="솎기 후 생육 1">
-            <img src="assets/솎기 후 생육_2.jpg" alt="솎기 후 생육 2">
-          </div>
-          <div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯, 광/환기 관리 중요</span></div>
-        </div>
-        <div class="stage">
-          <h3>⑤ 수확</h3>
-          <div class="imgs"><img src="assets/수확_1.jpg" alt="수확"></div>
-          <div class="kv"><b>설명</b><span>품질 구분: 특상 / 상 / 보통</span></div>
-        </div>
+      <h3>① 입상(개봉)</h3>
+      <div class="imgs">
+        <img src="assets/입상(개봉) 1.jpg">
+        <img src="assets/입상(개봉) 2.jpg">
       </div>
-
-      <div id="env" class="tabpage" style="display:none;">
-        <h3>기본 환경조건</h3>
-        <ul>
-          <li>입상(개봉): 온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
-          <li>발이 후 생육: 온도 15±2℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
-        </ul>
-        <p style="color:#9fb0c0;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
-      </div>
+      <p>배지를 개봉하고 생육 준비 단계 시작</p>
     </div>
   </aside>
+</main>
 
-  <script>
-    const base = "assets/videos";
-    const STANDARD_ID = "mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4";
-    const STANDARD_PATH = `${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`;
+<script>
+const base="assets/videos";
+const STANDARD_PATH=`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`;
+const stdPlayer=document.getElementById("stdPlayer");
+const cmpPlayer=document.getElementById("cmpPlayer");
+const cmpA=document.getElementById("cmpPlayerA");
+const cmpB=document.getElementById("cmpPlayerB");
+const cmpSingle=document.getElementById("cmpSingleWrap");
+const cmpDual=document.getElementById("cmpDualWrap");
+const stdStatus=document.getElementById("stdStatus");
+const cmpStatus=document.getElementById("cmpStatus");
 
-    // players
-    const stdPlayer   = document.getElementById("stdPlayer");
-    const cmpPlayer   = document.getElementById("cmpPlayer");
-    const cmpPlayerA  = document.getElementById("cmpPlayerA");
-    const cmpPlayerB  = document.getElementById("cmpPlayerB");
-    const stdStatus   = document.getElementById("stdStatus");
-    const cmpStatus   = document.getElementById("cmpStatus");
-    const cmpSingleWrap = document.getElementById("cmpSingleWrap");
-    const cmpDualWrap   = document.getElementById("cmpDualWrap");
+let autoplayUnlocked=false;
+function unlockAutoplay(){
+  if(autoplayUnlocked)return;autoplayUnlocked=true;
+  [stdPlayer,cmpPlayer,cmpA,cmpB].forEach(p=>{
+    if(p){p.muted=true;p.setAttribute('muted','');p.autoplay=true;p.play().catch(()=>{});}
+  });
+}
+['pointerdown','touchstart','keydown'].forEach(e=>window.addEventListener(e,unlockAutoplay,{once:true}));
 
-    /* ---------- 자동재생 해제 루틴 ---------- */
-    let autoplayUnlocked = false;
-    async function unlockAutoplay(){
-      if (autoplayUnlocked) return;
-      autoplayUnlocked = true;
-      const list = [stdPlayer, cmpPlayer, cmpPlayerA, cmpPlayerB].filter(Boolean);
-      for (const p of list){
-        try {
-          p.muted = true;
-          p.setAttribute('muted','');
-          p.setAttribute('playsinline','');
-          p.setAttribute('webkit-playsinline','');
-          p.autoplay = true;
-          await p.play();
-        } catch {}
-      }
-    }
-    ['pointerdown','keydown','touchstart','visibilitychange']
-      .forEach(evt=>window.addEventListener(evt,unlockAutoplay,{once:true,passive:true}));
+async function fileExistsSmart(url){
+  try{const r=await fetch(url,{method:"HEAD"});return r.ok;}catch{return false;}
+}
+const withCacheBuster=u=>u+"?v="+Date.now();
 
-    /* =====================================================
-       ✅ 패치1: HEAD 실패 시 대안경로 및 강제로드 지원
-    ===================================================== */
-    function logStatus(msg){ try{console.log("[MUSHROOM]",msg);}catch{} }
+async function loadVideo(player,status,url){
+  const ok=await fileExistsSmart(url);
+  if(!ok){status.textContent="파일없음: "+url;return;}
+  player.src=withCacheBuster(url);
+  player.load();
+  player.oncanplay=()=>{player.play().catch(()=>{});status.textContent="재생 중: "+url;};
+}
+async function updateCompare(){
+  const aging=document.getElementById("aging").value;
+  const qual=document.getElementById("quality").value;
+  if(aging==="both"){
+    cmpSingle.style.display="none";cmpDual.style.display="grid";
+    await loadVideo(cmpA,cmpStatus,`${base}/aging/aging-15.mp4`);
+    await loadVideo(cmpB,cmpStatus,`${base}/aging/aging-18.mp4`);
+  }else{
+    cmpSingle.style.display="block";cmpDual.style.display="none";
+    let url=STANDARD_PATH;
+    if(qual!=="none") url=`${base}/quality/${qual}.mp4`;
+    else if(aging!=="none") url=`${base}/aging/aging-${aging}.mp4`;
+    await loadVideo(cmpPlayer,cmpStatus,url);
+  }
+}
+document.getElementById("aging").onchange=updateCompare;
+document.getElementById("quality").onchange=updateCompare;
 
-    const existsCache = new Map();
-    async function fileExistsSmart(relPath){
-      const url = encodeURI(relPath);
-      if (existsCache.has(url)) return existsCache.get(url);
+document.getElementById("playBoth").onclick=()=>{[stdPlayer,cmpPlayer,cmpA,cmpB].forEach(p=>p.play().catch(()=>{}));};
+document.getElementById("pauseBoth").onclick=()=>{[stdPlayer,cmpPlayer,cmpA,cmpB].forEach(p=>p.pause?.());};
+document.getElementById("syncTime").onclick=()=>{const t=stdPlayer.currentTime;[cmpPlayer,cmpA,cmpB].forEach(p=>{if(p&&!isNaN(t))p.currentTime=t;});};
 
-      try{
-        const r = await fetch(url,{method:"HEAD",cache:"no-store"});
-        if (r.ok){ existsCache.set(url,true); return true; }
-      }catch(e){}
-
-      // 대문자 확장자
-      if (url.endsWith(".mp4")){
-        const alt = url.slice(0,-4)+".MP4";
-        try{
-          const r2 = await fetch(alt,{method:"HEAD",cache:"no-store"});
-          if (r2.ok){ existsCache.set(alt,true); return alt; }
-        }catch(e){}
-      }
-      // converted/ 폴더 탐색 (노화 폴더 가정)
-      if (!/\/converted\//.test(url)){
-        const conv = url.replace("/aging/","/aging/converted/");
-        try{
-          const r3 = await fetch(conv,{method:"HEAD",cache:"no-store"});
-          if (r3.ok){ existsCache.set(conv,true); return conv; }
-        }catch(e){}
-      }
-      // HEAD 실패 시 강제 로드
-      existsCache.set(url,"force");
-      return "force";
-    }
-
-    const withCacheBuster = abs=>{
-      const u=new URL(abs,location.href); u.searchParams.set("v",Date.now()); return u.toString();
-    };
-
-    async function loadToPlayer(player,statusEl,relPath){
-      let url=relPath;
-      const test=await fileExistsSmart(relPath);
-
-      if(test===true){
-        // ok 그대로
-      }else if(typeof test==="string" && test!=="force"){
-        url=test;
-      }else if(test==="force"){
-        logStatus(`HEAD 실패 → 강제 로드: ${relPath}`);
-      }else{
-        statusEl.innerHTML=`<span class="err">파일 없음: <code>${relPath}</code></span>`;
-        try{player.pause();}catch{} player.removeAttribute("src"); player.load(); return false;
-      }
-
-      try{player.pause();}catch{}
-      player.removeAttribute("src"); player.load();
-      player.muted=true;
-      player.setAttribute('muted','');
-      player.setAttribute('playsinline','');
-      player.setAttribute('webkit-playsinline','');
-      player.autoplay=true;
-
-      const finalUrl=withCacheBuster(url);
-      player.src=finalUrl;
-
-      player.onerror=()=>{statusEl.innerHTML=`<span class="err">재생 오류: <code>${finalUrl}</code></span>`;logStatus(`onerror:${finalUrl}`);};
-      player.oncanplay=()=>{statusEl.textContent=`재생 중: ${finalUrl}`;logStatus(`oncanplay:${finalUrl}`);};
-
-      try{await player.play();}
-      catch{statusEl.innerHTML=`자동재생 차단됨 → 상단 <b>둘다 재생</b> 클릭: <code>${finalUrl}</code>`;logStatus(`autoplay blocked:${finalUrl}`);}    
-      return true;
-    }
-
-    const pathForQuality   = () => `${base}/quality/${buildQualityFile()}`;
-    const pathForAging=v=>`${base}/aging/aging-${v}.mp4`;
-    const pathForSubstrate = () => `${base}/substrate/${buildSubstrateFile()}`;
-
-    // 우선순위: 품질 > 노화(both) > 노화(단일) > 배지 변화 > 솎기 단독 > 조합
-    async function updateCompare(){
-      // 토글 ON: 추가 보기(품질/노화/배지/솎기단독)만 비교에 사용
-      if (extrasPinned) {
-        if (selAging.value === "both") {
-          cmpSingleWrap.style.display = "none";
-          cmpDualWrap.style.display   = "grid";
-          const okA = await loadToPlayer(cmpPlayerA, cmpStatus, pathForAging("15"));
-          const okB = await loadToPlayer(cmpPlayerB, cmpStatus, pathForAging("18"));
-          if (okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
-          unlockAutoplay();
-          return;
-        }
-
-        cmpDualWrap.style.display   = "none";
-        cmpSingleWrap.style.display = "block";
-
-        let relPath = "";
-        if (selQual.value !== "none") {
-          relPath = pathForQuality();
-        } else if (selAging.value === "15" || selAging.value === "18") {
-          relPath = pathForAging(selAging.value);
-        } else if (selSubstrate.value === "on") {
-          relPath = pathForSubstrate();
-        } else if (selThinMode.value==="on" && selThinSolo.value!=="none") {
-          relPath = `${base}/thinning/${buildThinSoloFile()}`;
-        } else {
-          cmpStatus.innerHTML = `추가 보기가 선택되지 않았습니다. 옵션을 선택하거나 스위치를 끄세요.`;
-          try{ cmpPlayer.pause(); }catch{}
-          return;
-        }
-        await loadToPlayer(cmpPlayer, cmpStatus, relPath);
-        unlockAutoplay();
-        return;
-      }
-
-      // 토글 OFF: 기존 우선순위
-      if (selAging.value === "both") {
-        cmpSingleWrap.style.display = "none";
-        cmpDualWrap.style.display   = "grid";
-        const okA = await loadToPlayer(cmpPlayerA, cmpStatus, pathForAging("15"));
-        const okB = await loadToPlayer(cmpPlayerB, cmpStatus, pathForAging("18"));
-        if (okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
-        unlockAutoplay();
-        return;
-      }
-
-      cmpDualWrap.style.display   = "none";
-      cmpSingleWrap.style.display = "block";
-
-      let relPath = "";
-      if (selQual.value !== "none") {
-        relPath = pathForQuality();
-      } else if (selAging.value === "15" || selAging.value === "18") {
-        relPath = pathForAging(selAging.value);
-        await loadToPlayer(cmpPlayer, cmpStatus, relPath);
-        unlockAutoplay();
-        return;
-      } else if (selSubstrate.value === "on") {
-        relPath = pathForSubstrate();
-      } else if (selThinMode.value==="on" && selThinSolo.value!=="none") {
-        relPath = `${base}/thinning/${buildThinSoloFile()}`;
-      } else {
-        relPath = `${base}/${buildComboFile()}`;
-      }
-      await loadToPlayer(cmpPlayer, cmpStatus, relPath);
-    }
-
-    /* ===== [PATCH] 필수 바인딩/유틸/헬퍼 보강 ===== */
-    const $ = (id) => document.getElementById(id);
-
-    // 1) 버튼/패널 트리거 바인딩
-    const playBothBtn   = $("playBoth");
-    const pauseBothBtn  = $("pauseBoth");
-    const syncTimeBtn   = $("syncTime");
-    const openManualBtn = $("openManual");
-    const closeManualBtn= $("closeManual");
-    const panel         = $("panel");
-
-    // 2) 셀렉트 바인딩
-    const selS1T = $("s1temp");
-    const selS1L = $("s1light");
-    const selS1H = $("s1hum");
-
-    const selS2T = $("s2temp");
-    const selS2H = $("s2hum");
-    const selS2L = $("s2light");
-
-    const selQual = $("quality");
-    const selAging = $("aging");
-
-    const selThinMode = $("thinMode");
-    const selThinSolo = $("thinSolo");
-
-    const selSubstrate = $("substrate");
-
-    // 3) 추가보기 스위치 상태
-    const extrasPinSwitch = $("extrasPinSwitch");
-    let extrasPinned = false;
-    extrasPinSwitch.addEventListener("change", () => {
-      extrasPinned = extrasPinSwitch.checked;
-      updateCompare();
-    });
-
-    // 4) 파일명 빌더(프로젝트 규칙과 일치)
-    function buildQualityFile(){
-      // quality/{quality_excellent|quality_high|quality_normal}.mp4
-      return `${selQual.value}.mp4`;
-    }
-    function buildSubstrateFile(){
-      // substrate/substrate_change.mp4 (토글 on일 때만)
-      return `substrate_change.mp4`;
-    }
-    function buildThinSoloFile(){
-      // thinning/thinning_{5|10|20|none}.mp4
-      return `thinning_${selThinSolo.value}.mp4`;
-    }
-    function buildComboFile(){
-      // assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4
-      const S1T = selS1T.value;
-      const S1H = selS1H.value; // 고정 90
-      const S1L = selS1L.value;
-
-      const S2T = selS2T.value;
-      const S2H = selS2H.value;
-      const S2L = selS2L.value;
-
-      // T(솎기) 값은 현재 10으로 고정
-      return `mushroom_S1T${S1T}_H${S1H}_L${S1L}_S2T${S2T}_H${S2H}_L${S2L}_T10.mp4`;
-    }
-
-    // 5) 패널 열고닫기
-    openManualBtn?.addEventListener("click", ()=> panel.classList.add("open"));
-    closeManualBtn?.addEventListener("click", ()=> panel.classList.remove("open"));
-
-    // 6) 상단 버튼 동작
-    playBothBtn?.addEventListener("click", ()=>{
-      try{ stdPlayer.play(); }catch{}
-      try{ cmpPlayer.play(); }catch{}
-      try{ cmpPlayerA.play(); cmpPlayerB.play(); }catch{}
-    });
-    pauseBothBtn?.addEventListener("click", ()=>{
-      try{ stdPlayer.pause(); }catch{}
-      try{ cmpPlayer.pause(); }catch{}
-      try{ cmpPlayerA.pause(); cmpPlayerB.pause(); }catch{}
-    });
-    syncTimeBtn?.addEventListener("click", ()=>{
-      try{
-        const t = stdPlayer.currentTime;
-        if (!isNaN(t)){
-          try{ cmpPlayer.currentTime = t; }catch{}
-          try{ cmpPlayerA.currentTime = t; }catch{}
-          try{ cmpPlayerB.currentTime = t; }catch{}
-        }
-      }catch{}
-    });
-
-    // 7) 셀렉트 변경 시 비교 업데이트
-    [
-      selS1T, selS1L, selS1H,
-      selS2T, selS2H, selS2L,
-      selQual, selAging,
-      selThinMode, selThinSolo,
-      selSubstrate
-    ].forEach(el => el?.addEventListener("change", updateCompare));
-
-    // 8) 초기 로드
-    (async()=>{
-      await loadToPlayer(stdPlayer,stdStatus,STANDARD_PATH);
-      await updateCompare();
-    })();
-  </script>
+(async()=>{await loadVideo(stdPlayer,stdStatus,STANDARD_PATH);await updateCompare();})();
+</script>
 </body>
 </html>
-
