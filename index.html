@@ -13,7 +13,6 @@
   --radius:14px; --inc:5pt; --header-h:72px; --gap:12px;
   --left-col:15cm; --left-gap:1cm; --page-pad:48px;
   --video-w: clamp(20cm, 22cm, 25cm);
-  --safe-w: calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
 }
 *{box-sizing:border-box;}
 html,body{height:100%}
@@ -61,7 +60,6 @@ select{
   background:#0f141a; color:#fff; border:1px solid #2a3847;
 }
 .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.hint{font-size:calc(11px + var(--inc)); color:var(--muted); margin-top:8px; line-height:1.45;}
 
 /* 추가 보기 스위치 */
 .extrasHeader{display:flex; align-items:center; justify-content:space-between; margin:8px 0 6px;}
@@ -73,7 +71,7 @@ select{
 .extrasToggle .switch input:checked ~ .track{background:#2b4e68; border-color:#4fa3d1;}
 .extrasToggle .switch input:checked ~ .thumb{left:calc(100% - 3px - 22px);}
 
-/* 우측 영상 */
+/* ===== 영상 ===== */
 .stack{
   display:grid; gap:var(--gap);
   grid-template-rows: 1fr 1fr;
@@ -89,7 +87,8 @@ select{
 .vmedia{flex:1 1 auto; display:flex; justify-content:center;}
 .vmedia video{
   width:var(--video-w); border-radius:10px; background:#000; object-fit:contain;
-  position:relative; left:-5cm;
+  position:relative; left:-10cm;           /* ← 좌측으로 10cm 이동 */
+  height:calc(100% - 2cm);                /* ← 높이 2cm 축소 */
 }
 .status{font-size:13px; color:var(--muted); margin-top:4px;}
 
@@ -153,7 +152,7 @@ select{
   </section>
 </main>
 
-<!-- ✅ 표준 매뉴얼 완전 복원 -->
+<!-- ✅ 표준 매뉴얼 복구 버전 -->
 <aside id="panel" class="sidepanel">
   <div class="phead">
     <strong>표준 매뉴얼</strong>
@@ -165,24 +164,41 @@ select{
   </div>
   <div class="pcontent">
     <div id="manual" class="tabpage" style="display:block;">
-      <div class="stage"><h3>① 입상(개봉)</h3>
-        <div class="imgs"><img src="assets/입상(개봉) 1.jpg"><img src="assets/입상(개봉) 2.jpg"></div>
-        <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
+      <div class="stage">
+        <h3>① 입상(개봉)</h3>
+        <div class="imgs"><img src="assets/입상(개봉)_1.jpg"><img src="assets/입상(개봉)_2.jpg"></div>
+        <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작. 표면이 건조되지 않도록 관리</span></div>
         <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
       </div>
-      <div class="stage"><h3>② 발이 후 생육</h3>
+      <div class="stage">
+        <h3>② 발이 후 생육</h3>
         <div class="imgs"><img src="assets/발이 후 생육.jpg"></div>
-        <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기</span></div>
+        <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기. 광·습도 조절로 균일한 생육 유도</span></div>
+        <div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div>
       </div>
-      <div class="stage"><h3>③ 솎기</h3><div class="imgs"><img src="assets/솎기_1.jpg"></div></div>
-      <div class="stage"><h3>④ 솎기 후 생육</h3><div class="imgs"><img src="assets/솎기 후 생육_1.jpg"><img src="assets/솎기 후 생육_2.jpg"></div></div>
-      <div class="stage"><h3>⑤ 수확</h3><div class="imgs"><img src="assets/수확_1.jpg"></div></div>
+      <div class="stage">
+        <h3>③ 솎기</h3>
+        <div class="imgs"><img src="assets/솎기.jpg"></div>
+        <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아내어 공간 확보, 통풍 개선</span></div>
+      </div>
+      <div class="stage">
+        <h3>④ 솎기 후 생육</h3>
+        <div class="imgs"><img src="assets/솎기 후 생육_1.jpg"><img src="assets/솎기 후 생육_2.jpg"></div>
+        <div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯 관리 단계. 광·환기 관리 중요</span></div>
+      </div>
+      <div class="stage">
+        <h3>⑤ 수확</h3>
+        <div class="imgs"><img src="assets/수확_1.jpg"></div>
+        <div class="kv"><b>설명</b><span>버섯 갓이 완전히 개화하기 전 수확. 품질 구분: 특상 / 상 / 보통</span></div>
+      </div>
     </div>
     <div id="env" class="tabpage" style="display:none;">
       <h3>기본 환경조건</h3>
       <ul>
         <li>입상(개봉): 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
         <li>발이 후 생육: 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
+        <li>솎기 후 생육: 18℃, 습도 85±1%, CO₂ 1000ppm, 광 on</li>
+        <li>수확 전: 20±1℃, 습도 80±1%</li>
       </ul>
     </div>
   </div>
@@ -196,14 +212,33 @@ const stdStatus=document.getElementById("stdStatus");
 const cmpStatus=document.getElementById("cmpStatus");
 const extrasSwitch=document.getElementById("extrasSwitch");
 let extrasOn=false;
+
+// 매뉴얼 탭
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tabpage").forEach(p=>p.style.display="none");
+    document.getElementById(btn.dataset.tab).style.display="block";
+  });
+});
+
 extrasSwitch.addEventListener("change",()=>{extrasOn=extrasSwitch.checked;updateCompare();});
+document.querySelectorAll("select").forEach(sel=>sel.addEventListener("change",updateCompare));
+
 const panel=document.getElementById("panel");
 document.getElementById("openManual").onclick=()=>panel.classList.add("open");
 document.getElementById("closeManual").onclick=()=>panel.classList.remove("open");
 
 async function fileExists(u){try{return (await fetch(u,{method:"HEAD"})).ok}catch{return false}}
 async function ensurePlay(p){try{p.muted=true;p.setAttribute("playsinline","");await p.play();}catch{}}
-async function loadToPlayer(player,status,path){const ok=await fileExists(path);if(!ok){status.textContent="파일 없음: "+path;return;}player.src=path;await ensurePlay(player);status.textContent="재생 중: "+path.split('/').pop();}
+async function loadToPlayer(player,status,path){
+  const ok=await fileExists(path);
+  if(!ok){status.textContent="파일 없음: "+path;return;}
+  player.src=path;
+  await ensurePlay(player);
+  status.textContent="재생 중: "+path.split('/').pop();
+}
 
 async function updateCompare(){
   let rel="";
@@ -225,7 +260,10 @@ async function updateCompare(){
   }
   await loadToPlayer(cmp,cmpStatus,rel);
 }
-(async()=>{await loadToPlayer(std,stdStatus,`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`);await updateCompare();})();
+(async()=>{
+  await loadToPlayer(std,stdStatus,`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`);
+  await updateCompare();
+})();
 </script>
 </body>
 </html>
