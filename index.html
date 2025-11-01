@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <title>버섯 생육 시뮬레이션 뷰어</title>
+  <title>버섯 생육 시뮬레이션 뷰어 (Patch 1)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -505,7 +505,7 @@
           if (r2.ok){ existsCache.set(alt,true); return alt; }
         }catch(e){}
       }
-      // converted/ 폴더 탐색
+      // converted/ 폴더 탐색 (노화 폴더 가정)
       if (!/\/converted\//.test(url)){
         const conv = url.replace("/aging/","/aging/converted/");
         try{
@@ -552,7 +552,7 @@
       player.oncanplay=()=>{statusEl.textContent=`재생 중: ${finalUrl}`;logStatus(`oncanplay:${finalUrl}`);};
 
       try{await player.play();}
-      catch{statusEl.innerHTML=`자동재생 차단됨 → 상단 <b>둘다 재생</b> 클릭: <code>${finalUrl}</code>`;logStatus(`autoplay blocked:${finalUrl}`);}
+      catch{statusEl.innerHTML=`자동재생 차단됨 → 상단 <b>둘다 재생</b> 클릭: <code>${finalUrl}</code>`;logStatus(`autoplay blocked:${finalUrl}`);}    
       return true;
     }
 
@@ -628,31 +628,105 @@
       await loadToPlayer(cmpPlayer, cmpStatus, relPath);
     }
 
-    // 버튼
-    playBoth.addEventListener("click", ()=>{
+    /* ===== [PATCH] 필수 바인딩/유틸/헬퍼 보강 ===== */
+    const $ = (id) => document.getElementById(id);
+
+    // 1) 버튼/패널 트리거 바인딩
+    const playBothBtn   = $("playBoth");
+    const pauseBothBtn  = $("pauseBoth");
+    const syncTimeBtn   = $("syncTime");
+    const openManualBtn = $("openManual");
+    const closeManualBtn= $("closeManual");
+    const panel         = $("panel");
+
+    // 2) 셀렉트 바인딩
+    const selS1T = $("s1temp");
+    const selS1L = $("s1light");
+    const selS1H = $("s1hum");
+
+    const selS2T = $("s2temp");
+    const selS2H = $("s2hum");
+    const selS2L = $("s2light");
+
+    const selQual = $("quality");
+    const selAging = $("aging");
+
+    const selThinMode = $("thinMode");
+    const selThinSolo = $("thinSolo");
+
+    const selSubstrate = $("substrate");
+
+    // 3) 추가보기 스위치 상태
+    const extrasPinSwitch = $("extrasPinSwitch");
+    let extrasPinned = false;
+    extrasPinSwitch.addEventListener("change", () => {
+      extrasPinned = extrasPinSwitch.checked;
+      updateCompare();
+    });
+
+    // 4) 파일명 빌더(프로젝트 규칙과 일치)
+    function buildQualityFile(){
+      // quality/{quality_excellent|quality_high|quality_normal}.mp4
+      return `${selQual.value}.mp4`;
+    }
+    function buildSubstrateFile(){
+      // substrate/substrate_change.mp4 (토글 on일 때만)
+      return `substrate_change.mp4`;
+    }
+    function buildThinSoloFile(){
+      // thinning/thinning_{5|10|20|none}.mp4
+      return `thinning_${selThinSolo.value}.mp4`;
+    }
+    function buildComboFile(){
+      // assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4
+      const S1T = selS1T.value;
+      const S1H = selS1H.value; // 고정 90
+      const S1L = selS1L.value;
+
+      const S2T = selS2T.value;
+      const S2H = selS2H.value;
+      const S2L = selS2L.value;
+
+      // T(솎기) 값은 현재 10으로 고정
+      return `mushroom_S1T${S1T}_H${S1H}_L${S1L}_S2T${S2T}_H${S2H}_L${S2L}_T10.mp4`;
+    }
+
+    // 5) 패널 열고닫기
+    openManualBtn?.addEventListener("click", ()=> panel.classList.add("open"));
+    closeManualBtn?.addEventListener("click", ()=> panel.classList.remove("open"));
+
+    // 6) 상단 버튼 동작
+    playBothBtn?.addEventListener("click", ()=>{
       try{ stdPlayer.play(); }catch{}
       try{ cmpPlayer.play(); }catch{}
       try{ cmpPlayerA.play(); cmpPlayerB.play(); }catch{}
     });
-    pauseBoth.addEventListener("click", ()=>{
+    pauseBothBtn?.addEventListener("click", ()=>{
       try{ stdPlayer.pause(); }catch{}
       try{ cmpPlayer.pause(); }catch{}
       try{ cmpPlayerA.pause(); cmpPlayerB.pause(); }catch{}
     });
-    syncTime.addEventListener("click", ()=>{
+    syncTimeBtn?.addEventListener("click", ()=>{
       try{
         const t = stdPlayer.currentTime;
-        try{ cmpPlayer.currentTime = t; }catch{}
-        try{ cmpPlayerA.currentTime = t; }catch{}
-        try{ cmpPlayerB.currentTime = t; }catch{}
+        if (!isNaN(t)){
+          try{ cmpPlayer.currentTime = t; }catch{}
+          try{ cmpPlayerA.currentTime = t; }catch{}
+          try{ cmpPlayerB.currentTime = t; }catch{}
+        }
       }catch{}
     });
 
-    // 변경 이벤트
-    [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo, selSubstrate]
-      .forEach(el=> el.addEventListener("change", updateCompare));
+    // 7) 셀렉트 변경 시 비교 업데이트
+    [
+      selS1T, selS1L, selS1H,
+      selS2T, selS2H, selS2L,
+      selQual, selAging,
+      selThinMode, selThinSolo,
+      selSubstrate
+    ].forEach(el => el?.addEventListener("change", updateCompare));
 
-    // 초기 로드
+    // 8) 초기 로드
     (async()=>{
       await loadToPlayer(stdPlayer,stdStatus,STANDARD_PATH);
       await updateCompare();
@@ -660,4 +734,3 @@
   </script>
 </body>
 </html>
-
