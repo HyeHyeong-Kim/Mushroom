@@ -37,7 +37,7 @@
       gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
       /* 이동 제거: 제목 잘림 방지, 표준 위치 */
     }
-    h1{margin:0; font-size:calc(24px + var(--inc))}
+    h1{margin:0; font-size:calc(27px + var(--inc))}
     .sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
     .toolbar{display:flex; gap:10px; flex-wrap:wrap}
     .btn{
@@ -45,6 +45,18 @@
       background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc))
     }
     .btn:hover{border-color:#415e7a}
+
+    /* 📌 추가 보기 버튼 활성화 상태 */
+    #extrasPin[aria-pressed="true"] {
+      background-color: #2b4e68;
+      border-color: #4fa3d1;
+      color: #ffffff;
+      box-shadow: 0 0 8px rgba(79,163,209,0.5);
+    }
+#extrasPin:hover {
+  background-color: #1d2c3a;
+}
+
 
     /* ===== Main 레이아웃 ===== */
     main{
@@ -178,6 +190,25 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
 
+  /* 상단 브랜드(경기도농업기술원 + 로고) */
+  .brandArea {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 20px;
+  }
+  .brandName {
+    font-size: calc(14px + var(--inc));
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .brandLogo {
+    height: 38px;       /* 로고 크기 */
+    width: auto;
+    border-radius: 4px;
+  }
+
+
     /* 작은 화면 대응 */
     @media (max-width: 1200px){
       body{ overflow:auto; }
@@ -193,6 +224,13 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
       <h1>버섯 생육 시뮬레이션</h1>
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
     </div>
+
+      <!-- 👇 새로 추가 경기도 심볼 -->
+    <div class="brandArea">
+      <span class="brandName">경기도농업기술원</span>
+      <img src="assets/경기도심볼.jpg" alt="경기도 로고" class="brandLogo" />
+    </div>
+    
     <div class="toolbar">
       <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
       <button id="playBoth" class="btn" type="button">둘다 재생</button>
@@ -668,5 +706,6 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
   </script>
 </body>
 </html>
+
 
 
