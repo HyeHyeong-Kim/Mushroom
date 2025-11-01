@@ -122,24 +122,33 @@
     .vtitle{display:flex; align-items:center; gap:8px; margin:0 0 6px; color:#cfe1f3; font-size:calc(13px + var(--inc))}
     .badge{font-size:calc(10px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
 
-    .vmedia{ flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch; }
+    .vmedia{ flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch; overflow:hidden; }
     .vw{
       width:var(--video-w);
       max-width:var(--safe-w);
+      height:100%; /* 칸 높이에 맞춤 */
       display:block;
       position: relative;
-      left: -5cm;
+      left: 0; /* 칸 밖으로 밀리지 않도록 0으로 보정 */
     }
     .vw video{
       width:100%; height:100%;
       border-radius:10px; background:#000; object-fit:contain;
     }
 
+    /* dual 모드 영상도 칸 안에 맞추기 */
+    #cmpDualWrap video{
+      width:100%; height:100%;
+      object-fit:contain; background:#000; border-radius:10px;
+    }
+
     /* 2-up 비교 (aging both) */
     #cmpDualWrap{
       display:grid; grid-template-columns:1fr 1fr; gap:var(--gap);
       width:var(--video-w); max-width:var(--safe-w);
-      position: relative; left: -5cm;
+      height:100%; /* vmedia 영역을 꽉 채우되 내부 영상은 object-fit:contain */
+      position: relative; left: 0; /* 칸 밖으로 나가지 않도록 보정 */
+      margin:0 auto;
     }
 
     .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
@@ -186,6 +195,11 @@
     /* 작은 화면 대응 */
     @media (max-width: 1200px){
       body{ overflow:auto; }
+      main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
+      .stack{ grid-template-rows:auto; }
+      .vw{ width:100%; max-width:100%; left:0; }
+      #cmpDualWrap{ left:0; width:100%; max-width:100%; height:100%; }
+    }
       main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
       .stack{ grid-template-rows:auto; }
       .vw{ width:100%; max-width:100%; left:0; }
