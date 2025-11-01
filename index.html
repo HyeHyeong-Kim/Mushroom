@@ -1,93 +1,90 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<title>버섯 생육 시뮬레이션 뷰어 (Patch 1 Fixed)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-:root{
-  --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
-  --radius:14px; --inc:5pt; --header-h:72px; --gap:12px;
-  --left-col:15cm; --left-gap:1cm; --page-pad:48px;
-  --video-w:clamp(20cm,22cm,25cm);
-  --safe-w:calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
-}
-*{box-sizing:border-box;}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui,"Noto Sans KR";
-  overflow:hidden;
-}
-/* header */
-header{height:var(--header-h);display:flex;justify-content:space-between;align-items:center;
-  padding:8px 16px;border-bottom:1px solid #16202a;}
-h1{margin:0;font-size:calc(27px + var(--inc));}
-.sub{color:var(--muted);font-size:14px;}
-.toolbar{display:flex;gap:8px;}
-.btn{padding:8px 12px;border-radius:10px;border:1px solid #2a3847;background:#0f141a;color:#fff;cursor:pointer;}
-.btn:hover{border-color:#415e7a;}
-main{
-  display:grid;
-  grid-template-columns:var(--left-col) 1fr;
-  height:calc(100vh - var(--header-h));
-  gap:var(--gap);padding:var(--gap) 16px;
-  padding-left:calc(16px + var(--left-gap));
-}
-/* 좌측 패널 */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:12px;overflow:auto;}
-h2{margin:8px 0;font-size:calc(16px + var(--inc));}
-label{color:var(--muted);font-size:14px;}
-select{width:100%;padding:6px 8px;border-radius:8px;background:#0f141a;color:#fff;border:1px solid #2a3847;}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-/* 중앙 플레이어 */
-.stack{display:grid;grid-template-rows:1fr 1fr;gap:var(--gap);overflow:hidden;}
-.vcard{background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);padding:8px;display:flex;flex-direction:column;}
-.vtitle{color:#cfe1f3;margin-bottom:4px;font-size:15px;}
-.vmedia{
-  flex:1;display:flex;justify-content:center;align-items:center;
-  height:40vh; /* 두 영상 높이 동일 고정 */
-  overflow:hidden;
-}
-.vw{
-  width:var(--video-w);max-width:var(--safe-w);
-  height:100%;
-  margin:0 auto;
-  display:flex;justify-content:center;align-items:center;
-}
-.vw video{
-  width:100%;height:100%;
-  object-fit:contain;background:#000;border-radius:10px;
-}
-/* dual */
-#cmpDualWrap{
-  display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);
-  width:var(--video-w);max-width:var(--safe-w);
-  margin:0 auto;height:100%;
-}
-.status{font-size:13px;color:var(--muted);min-height:1.2em;}
-/* 매뉴얼 패널 */
-.sidepanel{position:fixed;top:0;right:0;width:460px;max-width:90vw;height:100vh;
-  background:var(--panel);border-left:1px solid #1c2a38;transform:translateX(100%);
-  transition:.3s;display:flex;flex-direction:column;z-index:50;}
-.sidepanel.open{transform:translateX(0);}
-.pcontent{padding:10px;overflow:auto;flex:1;}
-.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-.imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a;}
-/* 로고 */
-.brandDock{position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;
-background:rgba(20,26,32,.85);border:1px solid #2a3847;padding:8px 12px;border-radius:10px;}
-.brandName{font-weight:800;font-size:18px;}
-.brandLogo{height:110px;object-fit:contain;}
-</style>
+  <meta charset="utf-8" />
+  <title>버섯 생육 시뮬레이션 뷰어</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
+      --radius:14px; --inc:5pt;
+      --header-h:72px; --gap:12px;
+      --left-col:15cm; --left-gap:1cm; --page-pad:48px;
+      --video-w:clamp(20cm,22cm,25cm);
+      --safe-w:calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:system-ui, "Noto Sans KR";
+      font-size:calc(17px + var(--inc));line-height:1.5;
+      overflow:hidden;
+    }
+
+    header{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;
+      padding:8px 16px;border-bottom:1px solid #16202a;}
+    h1{margin:0;font-size:calc(27px + var(--inc))}
+    .sub{color:var(--muted);font-size:calc(12px + var(--inc))}
+    .toolbar{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:12px;border:1px solid #2a3847;background:#0f141a;color:#fff;cursor:pointer}
+    .btn:hover{border-color:#415e7a}
+
+    main{
+      height:calc(100vh - var(--header-h));
+      display:grid;grid-template-columns:var(--left-col) 1fr;
+      gap:var(--gap);padding:var(--gap) 16px; padding-left:calc(16px + var(--left-gap));
+      align-items:stretch;
+    }
+
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      padding:12px;overflow:auto;}
+    h2{margin:8px 0;font-size:calc(16px + var(--inc))}
+    select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#fff;border:1px solid #2a3847}
+    label{color:var(--muted);font-size:14px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    .stack{display:grid;gap:var(--gap);grid-template-rows:1fr 1fr;min-height:0;}
+    .vcard{background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
+      padding:8px;display:flex;flex-direction:column;min-height:0;}
+    .vtitle{color:#cfe1f3;margin-bottom:6px;font-size:15px;}
+    .badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
+
+    .vmedia{flex:1;display:flex;justify-content:center;align-items:center;height:40vh;overflow:hidden;}
+    .vw{
+      width:var(--video-w);max-width:var(--safe-w);
+      margin:0 auto;display:flex;justify-content:center;align-items:center;
+    }
+    .vw video{width:100%;height:100%;border-radius:10px;background:#000;object-fit:contain;}
+    #cmpDualWrap{
+      display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);
+      width:var(--video-w);max-width:var(--safe-w);margin:0 auto;height:100%;
+    }
+
+    .status{font-size:13px;color:var(--muted);min-height:1.2em}
+
+    .sidepanel{position:fixed;top:0;right:0;width:460px;max-width:92vw;height:100vh;
+      background:var(--panel);border-left:1px solid #1c2a38;transform:translateX(100%);
+      transition:.28s;display:flex;flex-direction:column;z-index:50;}
+    .sidepanel.open{transform:translateX(0)}
+    .pcontent{padding:12px;overflow:auto;flex:1;}
+    .imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+    .imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a}
+
+    .brandDock{position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;
+      background:rgba(20,26,32,.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;}
+    .brandName{font-weight:800;font-size:18px;}
+    .brandLogo{height:110px;object-fit:contain;}
+  </style>
 </head>
+
 <body>
 <header>
   <div>
     <h1>버섯 생육 시뮬레이션</h1>
-    <div class="sub">상단: 표준 자동재생 · 하단: 선택 비교 · 우측: 표준 매뉴얼</div>
+    <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
   </div>
-  <div class="brandDock"><span class="brandName">경기도농업기술원</span><img src="assets/경기도심볼.jpg" class="brandLogo"/></div>
+  <div class="brandDock"><span class="brandName">경기도농업기술원</span><img src="assets/경기도심볼.jpg" class="brandLogo"></div>
   <div class="toolbar">
     <button id="openManual" class="btn">매뉴얼</button>
     <button id="playBoth" class="btn">둘다 재생</button>
@@ -98,7 +95,7 @@ background:rgba(20,26,32,.85);border:1px solid #2a3847;padding:8px 12px;border-r
 
 <main>
   <section class="card">
-    <!-- 기존 환경설정 그대로 -->
+    <!-- (환경 설정 그대로) -->
     <h2>Stage1</h2>
     <div class="row">
       <div><label>온도</label><select id="s1temp"><option>13</option><option selected>18</option><option>23</option></select></div>
@@ -118,34 +115,35 @@ background:rgba(20,26,32,.85);border:1px solid #2a3847;padding:8px 12px;border-r
 
   <section class="stack">
     <div class="vcard">
-      <div class="vtitle">기준 플레이어</div>
-      <div class="vmedia"><div class="vw"><video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video></div></div>
+      <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
+      <div class="vmedia"><div class="vw"><video id="stdPlayer" controls muted autoplay playsinline preload="metadata"></video></div></div>
       <div id="stdStatus" class="status"></div>
     </div>
+
     <div class="vcard">
-      <div class="vtitle">비교 플레이어</div>
+      <div class="vtitle">비교 플레이어 <span class="badge">선택 조건/모드</span></div>
       <div class="vmedia">
-        <div id="cmpSingleWrap" class="vw"><video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video></div>
+        <div id="cmpSingleWrap" class="vw"><video id="cmpPlayer" controls muted autoplay playsinline preload="metadata"></video></div>
         <div id="cmpDualWrap" style="display:none;">
-          <video id="cmpPlayerA" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          <video id="cmpPlayerB" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
+          <video id="cmpPlayerA" controls muted autoplay playsinline preload="metadata"></video>
+          <video id="cmpPlayerB" controls muted autoplay playsinline preload="metadata"></video>
         </div>
       </div>
       <div id="cmpStatus" class="status"></div>
     </div>
   </section>
-
-  <aside id="panel" class="sidepanel">
-    <div class="pcontent">
-      <h3>① 입상(개봉)</h3>
-      <div class="imgs">
-        <img src="assets/입상(개봉) 1.jpg">
-        <img src="assets/입상(개봉) 2.jpg">
-      </div>
-      <p>배지를 개봉하고 생육 준비 단계 시작</p>
-    </div>
-  </aside>
 </main>
+
+<!-- 표준 매뉴얼 -->
+<aside id="panel" class="sidepanel" aria-hidden="true">
+  <div class="pcontent">
+    <h3>① 입상(개봉)</h3>
+    <div class="imgs">
+      <img src="assets/입상(개봉)_1.jpg" alt="">
+      <img src="assets/입상(개봉)_2.jpg" alt="">
+    </div>
+  </div>
+</aside>
 
 <script>
 const base="assets/videos";
@@ -168,41 +166,41 @@ function unlockAutoplay(){
 }
 ['pointerdown','touchstart','keydown'].forEach(e=>window.addEventListener(e,unlockAutoplay,{once:true}));
 
-async function fileExistsSmart(url){
+async function fileExists(url){
   try{const r=await fetch(url,{method:"HEAD"});return r.ok;}catch{return false;}
 }
 const withCacheBuster=u=>u+"?v="+Date.now();
 
-async function loadVideo(player,status,url){
-  const ok=await fileExistsSmart(url);
-  if(!ok){status.textContent="파일없음: "+url;return;}
+async function safePlay(player,status,url){
+  const ok=await fileExists(url);
+  if(!ok){status.textContent="파일 없음: "+url;return;}
   player.src=withCacheBuster(url);
   player.load();
   player.oncanplay=()=>{player.play().catch(()=>{});status.textContent="재생 중: "+url;};
 }
+
 async function updateCompare(){
   const aging=document.getElementById("aging").value;
   const qual=document.getElementById("quality").value;
   if(aging==="both"){
     cmpSingle.style.display="none";cmpDual.style.display="grid";
-    await loadVideo(cmpA,cmpStatus,`${base}/aging/aging-15.mp4`);
-    await loadVideo(cmpB,cmpStatus,`${base}/aging/aging-18.mp4`);
+    await safePlay(cmpA,cmpStatus,`${base}/aging/aging-15.mp4`);
+    await safePlay(cmpB,cmpStatus,`${base}/aging/aging-18.mp4`);
   }else{
     cmpSingle.style.display="block";cmpDual.style.display="none";
     let url=STANDARD_PATH;
-    if(qual!=="none") url=`${base}/quality/${qual}.mp4`;
-    else if(aging!=="none") url=`${base}/aging/aging-${aging}.mp4`;
-    await loadVideo(cmpPlayer,cmpStatus,url);
+    if(qual!=="none")url=`${base}/quality/${qual}.mp4`;
+    else if(aging!=="none")url=`${base}/aging/aging-${aging}.mp4`;
+    await safePlay(cmpPlayer,cmpStatus,url);
   }
 }
 document.getElementById("aging").onchange=updateCompare;
 document.getElementById("quality").onchange=updateCompare;
-
 document.getElementById("playBoth").onclick=()=>{[stdPlayer,cmpPlayer,cmpA,cmpB].forEach(p=>p.play().catch(()=>{}));};
 document.getElementById("pauseBoth").onclick=()=>{[stdPlayer,cmpPlayer,cmpA,cmpB].forEach(p=>p.pause?.());};
 document.getElementById("syncTime").onclick=()=>{const t=stdPlayer.currentTime;[cmpPlayer,cmpA,cmpB].forEach(p=>{if(p&&!isNaN(t))p.currentTime=t;});};
 
-(async()=>{await loadVideo(stdPlayer,stdStatus,STANDARD_PATH);await updateCompare();})();
+(async()=>{await safePlay(stdPlayer,stdStatus,STANDARD_PATH);await updateCompare();})();
 </script>
 </body>
 </html>
