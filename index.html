@@ -45,6 +45,27 @@
       background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc))
     }
     .btn:hover{border-color:#415e7a}
+    /* 추가 보기 헤더 + 토글 스위치 */
+    .extrasHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin:8px 0 6px;
+    }
+    .extrasToggle{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+      font-size:calc(12px + var(--inc)); color:var(--muted);
+    }
+    .extrasToggle input{
+      appearance:none; width:42px; height:24px; border-radius:999px;
+      background:#2a3847; position:relative; outline:none; border:1px solid #3a556e;
+      transition:.2s;
+    }
+    .extrasToggle input:checked{ background:#2b4e68; border-color:#4fa3d1; }
+    .extrasToggle .knob{
+      position:absolute; width:18px; height:18px; border-radius:50%;
+      background:#fff; transform:translateX(3px); transition:.2s; pointer-events:none;
+    }
+    .extrasToggle input:checked + .knob{ transform:translateX(21px); }
+
 
     /* 📌 추가 보기 버튼 활성화 상태 */
     #extrasPin[aria-pressed="true"] {
@@ -53,9 +74,18 @@
       color: #ffffff;
       box-shadow: 0 0 8px rgba(79,163,209,0.5);
     }
-#extrasPin:hover {
-  background-color: #1d2c3a;
-}
+    #extrasPin:hover {
+      background-color: #1d2c3a;
+    }
+
+    /* 추가 보기 안내문 */
+    .extrasHint {
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+      margin-bottom:10px;
+      line-height:1.4;
+    }
 
 
     /* ===== Main 레이아웃 ===== */
@@ -189,25 +219,21 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
     .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:calc(12px + var(--inc)); color:#b1c0cf; margin-top:4px}
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
-
-  /* 상단 브랜드(경기도농업기술원 + 로고) */
-  .brandArea {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-right: 20px;
+  
+  .brandDock{
+    position:fixed; right:16px; bottom:16px; z-index:60;
+    display:flex; align-items:center; gap:8px;
+    background:rgba(20,26,32,0.85); border:1px solid #2a3847;
+    padding:6px 10px; border-radius:10px; backdrop-filter: blur(2px);
   }
-  .brandName {
-    font-size: calc(14px + var(--inc));
-    color: var(--muted);
-    white-space: nowrap;
+  .brandName{
+    font-weight:700;                /* 굵게 */
+    font-size:calc(14px + var(--inc) + 3px); /* +3pt 상당의 증가 */
+    color:#e9f0f5; white-space:nowrap;
   }
-  .brandLogo {
-    height: 38px;       /* 로고 크기 */
-    width: auto;
-    border-radius: 4px;
+  .brandLogo{
+    height:38px; width:auto; border-radius:4px;
   }
-
 
     /* 작은 화면 대응 */
     @media (max-width: 1200px){
@@ -225,11 +251,12 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
     </div>
 
-      <!-- 👇 새로 추가 경기도 심볼 -->
-    <div class="brandArea">
+      <!-- 👇 새로 추가 경기도 심볼 --><!-- ⬇ 우측 하단 도킹 -->
+    <div class="brandDock" aria-label="기관 표기">
       <span class="brandName">경기도농업기술원</span>
       <img src="assets/경기도심볼.jpg" alt="경기도 로고" class="brandLogo" />
     </div>
+
     
     <div class="toolbar">
       <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
@@ -305,17 +332,18 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
       </div>
 
       <h2>추가 보기 (환경조건 무관)</h2>
-      <!-- ⬇⬇⬇ '추가 보기' 제목 바로 아래에 추가 -->
-      <div class="row" style="align-items:center; margin-top:-4px;">
-        <div style="grid-column:1 / -1; display:flex; align-items:center; gap:10px;">
-          <button id="extrasPin" class="btn" type="button" aria-pressed="false" title="추가 보기 값을 비교 플레이어에 고정">
-            📌 추가 보기 → 비교 적용
-          </button>
-          <span class="sub" id="extrasPinHint" style="font-size:12px;">
-            OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교
-          </span>
-        </div>
+      <!-- ⬇ 추가 보기 타이틀+우측 on/off 스위치 (교체) -->
+      <div class="extrasHeader">
+        <h2 style="margin:0;">추가 보기 (환경조건 무관)</h2>
+        <label class="extrasToggle">
+          <span>비교에 적용</span>
+          <input type="checkbox" id="extrasPinSwitch" />
+          <i class="knob" aria-hidden="true"></i>
+        </label>
       </div>
+      <p class="extrasHint">
+        OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교
+      </p>
 
       <div class="row">
         <div>
@@ -493,13 +521,16 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
     const selThinSolo = document.getElementById("thinSolo");
     const selSubstrate = document.getElementById("substrate");
 
-    const extrasPinBtn = document.getElementById("extrasPin");
-    let extrasPinned = false;
-
     // buttons
     const playBoth  = document.getElementById("playBoth");
     const pauseBoth = document.getElementById("pauseBoth");
     const syncTime  = document.getElementById("syncTime");
+    const extrasPinSwitch = document.getElementById("extrasPinSwitch");
+    let extrasPinned = false;
+    extrasPinSwitch.addEventListener("change", ()=>{
+      extrasPinned = extrasPinSwitch.checked;
+      updateCompare();
+    });
 
     // ===== 사이드 패널(표준 매뉴얼) 활성화 =====
     const panel = document.getElementById("panel");
@@ -513,31 +544,6 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
       panel.classList.remove("open");
       panel.setAttribute("aria-hidden","true");
     });
-
-    // 🔓 자동재생 해제 루틴 (최초 사용자 제스처 1회)
-    let autoplayUnlocked = false;
-    async function unlockAutoplay() {
-      if (autoplayUnlocked) return;
-      autoplayUnlocked = true;
-      const players = [stdPlayer, cmpPlayer, cmpPlayerA, cmpPlayerB].filter(Boolean);
-      for (const p of players) {
-        try {
-          p.muted = true;
-          p.setAttribute('muted','');
-          p.setAttribute('playsinline','');
-          p.setAttribute('webkit-playsinline','');
-          p.autoplay = true;
-          await p.play();
-        } catch (_) { /* 무시: 이후 수동 재생 버튼 안내로 대체 */ }
-      }
-    }
-// 어디든 첫 인터랙션에서 1회 해제
-['pointerdown','keydown','touchstart'].forEach(evt=>{
-  window.addEventListener(evt, unlockAutoplay, { once:true, passive:true });
-});
-// 버튼 클릭 시에도 확실히 해제
-playBoth.addEventListener('click', unlockAutoplay, { once:true });
-openManual.addEventListener('click', unlockAutoplay, { once:true });
 
     
     // 탭 전환 (기본 manual 탭을 보이도록)
@@ -653,6 +659,7 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
         const okA = await loadToPlayer(cmpPlayerA, cmpStatus, `${base}/aging/aging-15.mp4`);
         const okB = await loadToPlayer(cmpPlayerB, cmpStatus, `${base}/aging/aging-18.mp4`);
         if(okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
+          unlockAutoplay();    // ⬅ 추가
         return;
       }
       cmpDualWrap.style.display   = "none";
@@ -706,6 +713,7 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
   </script>
 </body>
 </html>
+
 
 
 
