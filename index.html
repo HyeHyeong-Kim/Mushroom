@@ -10,15 +10,15 @@
       --radius:14px; --inc:5pt;
       --header-h:72px; --gap:12px;
 
-      /* ▶ 요구사항 반영 */
+      /* 요구사항 반영 */
       --left-col: 15cm;     /* 좌측 패널 폭 고정 */
       --left-gap: 1cm;      /* 페이지 왼쪽 여백 */
       --page-pad: 48px;     /* 그리드 여유 패딩(우측) */
 
-      /* ▶ 플레이어 가로폭: 20–25cm에서 22cm 선호 */
+      /* 플레이어 가로폭: 20–25cm에서 22cm 선호 */
       --video-w: clamp(20cm, 22cm, 25cm);
 
-      /* ▶ 안전 폭: 뷰포트에서 좌측 패널+여백+패딩 제외 */
+      /* 안전 폭: 뷰포트에서 좌측 패널+여백+패딩 제외 */
       --safe-w: calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
     }
     *{box-sizing:border-box}
@@ -35,19 +35,17 @@
       height:var(--header-h);
       display:flex; align-items:center; justify-content:space-between;
       gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
-      /* 이동 제거: 제목 잘림 방지, 표준 위치 */
     }
     h1{margin:0; font-size:calc(27px + var(--inc))}
     .sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
     .toolbar{display:flex; gap:10px; flex-wrap:wrap}
     .btn{
       padding:8px 12px; border-radius:12px; border:1px solid #2a3847;
-      background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc))
+      background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc));
     }
     .btn:hover{border-color:#415e7a}
-    /* 추가 보기 헤더 + 토글 스위치 */
-    
-    /* 추가 보기 헤더 + 토글 스위치 (ON/OFF 텍스트 포함, 정렬 보정 완료) */
+
+    /* 추가 보기 헤더 + 토글 스위치 (ON/OFF 텍스트 포함, 정렬 보정) */
     .extrasHeader{
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin:8px 0 6px;
@@ -57,48 +55,29 @@
       font-size:calc(12px + var(--inc)); color:var(--muted);
     }
     .extrasToggle .labelText{ white-space:nowrap; }
-    
-    .extrasToggle .switch{
-      position:relative; width:64px; height:28px; flex:0 0 auto;
-    }
+    .extrasToggle .switch{ position:relative; width:64px; height:28px; flex:0 0 auto; }
     .extrasToggle .switch input{
       appearance:none; -webkit-appearance:none; outline:none; cursor:pointer;
-      position:absolute; inset:0; margin:0; padding:0; background:transparent; border:0;
-      z-index:3; /* 가장 위에서 클릭을 받게 */
+      position:absolute; inset:0; margin:0; padding:0; background:transparent; border:0; z-index:3;
     }
     .extrasToggle .switch .track{
-      position:absolute; inset:0;
-      border-radius:999px; background:#2a3847; border:1px solid #3a556e;
+      position:absolute; inset:0; border-radius:999px; background:#2a3847; border:1px solid #3a556e;
       display:flex; align-items:center; justify-content:space-between;
-      padding:0 8px; box-sizing:border-box;
-      color:#cfe3f7; font-size:11px; font-weight:600;
-      transition:background-color .2s, border-color .2s;
-      z-index:1;
+      padding:0 8px; box-sizing:border-box; color:#cfe3f7; font-size:11px; font-weight:600;
+      transition:background-color .2s, border-color .2s; z-index:1;
     }
     .extrasToggle .switch .state.off{ opacity:1; }
     .extrasToggle .switch .state.on { opacity:.45; }
-    
     .extrasToggle .switch .thumb{
-      position:absolute; top:50%; left:3px;
-      width:22px; height:22px; border-radius:50%;
-      background:#ffffff; transform:translateY(-50%);
-      box-shadow:0 2px 6px rgba(0,0,0,.25);
-      transition:left .2s ease;
-      z-index:2;
+      position:absolute; top:50%; left:3px; width:22px; height:22px; border-radius:50%;
+      background:#ffffff; transform:translateY(-50%); box-shadow:0 2px 6px rgba(0,0,0,.25);
+      transition:left .2s ease; z-index:2;
     }
-    
-    /* 체크되면 파란 트랙 + ON 강조 + 손잡이 우측 정렬 */
-    .extrasToggle .switch input:checked ~ .track{
-      background:#2b4e68; border-color:#4fa3d1;
-    }
+    .extrasToggle .switch input:checked ~ .track{ background:#2b4e68; border-color:#4fa3d1; }
     .extrasToggle .switch input:checked ~ .track .state.off{ opacity:.45; }
     .extrasToggle .switch input:checked ~ .track .state.on { opacity:1; }
-    
-    .extrasToggle .switch input:checked ~ .thumb{
-      left: calc(100% - 3px - 22px); /* 우측 3px 여백 */
-    }
-    
-    /* 추가 보기 안내문 */
+    .extrasToggle .switch input:checked ~ .thumb{ left: calc(100% - 3px - 22px); }
+
     .extrasHint{
       font-size:12px; color:var(--muted);
       margin-top:2px; margin-bottom:10px; line-height:1.4;
@@ -108,15 +87,15 @@
     main{
       height:calc(100vh - var(--header-h));
       display:grid;
-      grid-template-columns: var(--left-col) 1fr;  /* 좌측 15cm 고정 */
+      grid-template-columns: var(--left-col) 1fr;
       gap:var(--gap);
       padding:var(--gap) 16px var(--gap) 16px;
       padding-left: calc(16px + var(--left-gap));  /* 왼쪽 여백 1cm */
       align-items:stretch;
-      min-width: 0; /* 안전 */
+      min-width: 0;
     }
 
-    /* ===== 좌측 컨트롤 (내부 스크롤만 허용) ===== */
+    /* ===== 좌측 컨트롤 ===== */
     .card{
       background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
       padding:12px; overflow:auto; min-height:0;
@@ -125,12 +104,12 @@
     label{font-size:calc(12px + var(--inc)); display:block; margin:8px 0 6px; color:var(--muted)}
     select{
       width:100%; padding:8px 10px; border-radius:10px;
-      background:#0f141a; color:var(--text); border:1px solid #2a3847; font-size:calc(13px + var(--inc))
+      background:#0f141a; color:#fff; border:1px solid #2a3847; font-size:calc(13px + var(--inc));
     }
     .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     .hint{font-size:calc(11px + var(--inc)); color:var(--muted); margin-top:8px; line-height:1.45; word-break:break-all}
 
-    /* ===== 우측 영상 스택 (한 화면에 위/아래 1:1 배분) ===== */
+    /* ===== 우측 영상 스택 ===== */
     .stack{
       display:grid; gap:var(--gap);
       grid-template-rows: 1fr 1fr; /* 위/아래 균등 배분 */
@@ -143,49 +122,40 @@
     .vtitle{display:flex; align-items:center; gap:8px; margin:0 0 6px; color:#cfe1f3; font-size:calc(13px + var(--inc))}
     .badge{font-size:calc(10px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
 
-    /* ▶ 플레이어 폭 고정(20–25cm) + 안전 폭 제한 */
-    .vmedia{
-      flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch;
-    }
+    .vmedia{ flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch; }
     .vw{
       width:var(--video-w);
-      max-width:var(--safe-w);     /* 좌측 패널+여백 제외한 영역 안에서만 확대 */
+      max-width:var(--safe-w);
       display:block;
       position: relative;
-      left: -5cm
+      left: -5cm;
     }
     .vw video{
       width:100%; height:100%;
       border-radius:10px; background:#000; object-fit:contain;
     }
 
-    /* 2-up 비교 (aging both)도 동일 너비 유지 */
+    /* 2-up 비교 (aging both) */
     #cmpDualWrap{
-      display:grid; 
-      grid-template-columns:1fr 1fr; 
-      gap:var(--gap);
-      width:var(--video-w); 
-      max-width:var(--safe-w);
-      position: relative;
-      left: -5cm
+      display:grid; grid-template-columns:1fr 1fr; gap:var(--gap);
+      width:var(--video-w); max-width:var(--safe-w);
+      position: relative; left: -5cm;
     }
 
     .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
-    
 
-    /* ===== 사이드 패널(표준 매뉴얼) - 활성화 ===== */
+    /* ===== 사이드 패널(표준 매뉴얼) ===== */
     .sidepanel{
       position:fixed; top:0; right:0; width:460px; max-width:92vw; height:100vh; background:var(--panel);
       border-left:1px solid #1c2a38; transform:translateX(100%); transition:.28s ease;
-      display:flex; flex-direction:column; z-index:50;
-      pointer-events:auto; /* 클릭 가능 */
+      display:flex; flex-direction:column; z-index:50; pointer-events:auto;
     }
     .sidepanel.open{transform:translateX(0)}
     .phead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-bottom:1px solid #1c2a38}
     .tabs{display:flex; gap:8px}
     .tab{
       padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38;
-      color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc))
+      color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc));
     }
     .tab.active{background:#1b2735; border-color:#35506d}
     .pcontent{padding:12px 14px; overflow:auto; flex:1}
@@ -197,29 +167,29 @@
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
   
-  /* 우측 하단 도킹된 브랜드 영역 (중앙 정렬 + 로고 3배) */
-  .brandDock{
-    position:fixed; right:16px; bottom:16px; z-index:60;
-    display:flex; align-items:center; gap:12px;
-    background:rgba(20,26,32,0.85); border:1px solid #2a3847;
-    padding:8px 12px; border-radius:12px; backdrop-filter:blur(2px);
-  }
-  .brandName{
-    font-weight:800; /* 굵게 */
-    font-size:calc(14px + var(--inc) + 3px); /* +3pt 느낌 */
-    color:#e9f0f5; white-space:nowrap; line-height:1.1; text-align:center;
-  }
-  .brandLogo{
-    height:114px; /* 38px → 3배 */
-    width:auto; border-radius:6px; object-fit:contain;
-  }
+    /* 우측 하단 도킹된 브랜드 영역 (중앙 정렬 + 로고 3배) */
+    .brandDock{
+      position:fixed; right:16px; bottom:16px; z-index:60;
+      display:flex; align-items:center; gap:12px;
+      background:rgba(20,26,32,0.85); border:1px solid #2a3847;
+      padding:8px 12px; border-radius:12px; backdrop-filter:blur(2px);
+    }
+    .brandName{
+      font-weight:800;
+      font-size:calc(14px + var(--inc) + 3px);
+      color:#e9f0f5; white-space:nowrap; line-height:1.1; text-align:center;
+    }
+    .brandLogo{
+      height:114px; width:auto; border-radius:6px; object-fit:contain;
+    }
   
-  /* 작은 화면 대응 */
+    /* 작은 화면 대응 */
     @media (max-width: 1200px){
       body{ overflow:auto; }
       main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
       .stack{ grid-template-rows:auto; }
-      .vw{ width:100%; max-width:100%; }
+      .vw{ width:100%; max-width:100%; left:0; }
+      #cmpDualWrap{ left:0; width:100%; max-width:100%; }
     }
   </style>
 </head>
@@ -230,13 +200,12 @@
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
     </div>
 
-      <!-- 👇 새로 추가 경기도 심볼 --><!-- ⬇ 우측 하단 도킹 -->
+    <!-- 우측 하단 도킹(고정 요소이므로 header 안/밖 상관없음) -->
     <div class="brandDock" aria-label="기관 표기">
       <span class="brandName">경기도농업기술원</span>
       <img src="assets/경기도심볼.jpg" alt="경기도 로고" class="brandLogo" />
     </div>
 
-    
     <div class="toolbar">
       <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
       <button id="playBoth" class="btn" type="button">둘다 재생</button>
@@ -310,12 +279,11 @@
         </div>
       </div>
 
-<!-- ▶ 추가 보기 (환경조건 무관) 헤더 + 토글 + 안내문구  [왼쪽 패널 내, Stage2 다음 섹션] -->
+      <!-- ▶ 추가 보기 (환경조건 무관) 헤더 + 토글 + 안내문구 -->
       <div class="extrasHeader">
         <h2 style="margin:0;">추가 보기 (환경조건 무관)</h2>
         <label class="extrasToggle">
           <span class="labelText">비교에 적용</span>
-          <!-- 스위치: input + 트랙(OFF/ON) + 손잡이 -->
           <div class="switch">
             <input type="checkbox" id="extrasPinSwitch" />
             <div class="track">
@@ -329,7 +297,6 @@
       <p class="extrasHint">
         OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교
       </p>
-
 
       <div class="row">
         <div>
@@ -362,7 +329,7 @@
         <div>
           <label for="thinSolo">솎기(단독)</label>
           <select id="thinSolo">
-            <option value="thinning_none">none</option>
+            <option value="none">thinning_none</option>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -436,8 +403,9 @@
         <div class="stage">
           <h3>① 입상(개봉)</h3>
           <div class="imgs">
-            <img src="assets/입상(개봉) 1.jpg" alt="입상(개봉) 1">
-            <img src="assets/입상(개봉) 2.jpg" alt="입상(개봉) 2">
+            <!-- 파일명이 공백이면 %20 인코딩 필요 / 실제 파일명과 일치시켜 주세요 -->
+            <img src="assets/입상(개봉)_1.jpg" alt="입상(개봉) 1">
+            <img src="assets/입상(개봉)_2.jpg" alt="입상(개봉) 2">
           </div>
           <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
           <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
@@ -450,7 +418,7 @@
         </div>
         <div class="stage">
           <h3>③ 솎기</h3>
-          <div class="imgs"><img src="assets/솎기.JPG" alt="솎기"></div>
+          <div class="imgs"><img src="assets/솎기.jpg" alt="솎기"></div>
           <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아 균일 생육 확보</span></div>
         </div>
         <div class="stage">
@@ -493,6 +461,7 @@
     const cmpStatus = document.getElementById("cmpStatus");
     const cmpSingleWrap = document.getElementById("cmpSingleWrap");
     const cmpDualWrap   = document.getElementById("cmpDualWrap");
+
     // 🔓 자동재생 해제 루틴 (최초 사용자 제스처 1회)
     let autoplayUnlocked = false;
     async function unlockAutoplay() {
@@ -512,10 +481,6 @@
     ['pointerdown','keydown','touchstart','visibilitychange'].forEach(evt=>{
       window.addEventListener(evt, unlockAutoplay, { once:true, passive:true });
     });
-    // 버튼에서도 확실히 해제
-    playBoth.addEventListener('click', unlockAutoplay, { once:true });
-    openManual.addEventListener('click', unlockAutoplay, { once:true });
-
 
     // selectors
     const selS1T = document.getElementById("s1temp");
@@ -534,6 +499,11 @@
     const playBoth  = document.getElementById("playBoth");
     const pauseBoth = document.getElementById("pauseBoth");
     const syncTime  = document.getElementById("syncTime");
+    const openManual = document.getElementById("openManual");
+    openManual.addEventListener('click', unlockAutoplay, { once:true });
+    playBoth.addEventListener('click', unlockAutoplay, { once:true });
+
+    // 토글 스위치
     const extrasPinSwitch = document.getElementById("extrasPinSwitch");
     let extrasPinned = false;
     extrasPinSwitch.addEventListener("change", ()=>{
@@ -543,7 +513,6 @@
 
     // ===== 사이드 패널(표준 매뉴얼) 활성화 =====
     const panel = document.getElementById("panel");
-    const openManual = document.getElementById("openManual");
     const closeManual = document.getElementById("closeManual");
     openManual.addEventListener("click", ()=>{
       panel.classList.add("open");
@@ -554,8 +523,7 @@
       panel.setAttribute("aria-hidden","true");
     });
 
-    
-    // 탭 전환 (기본 manual 탭을 보이도록)
+    // 탭 전환
     document.querySelectorAll(".sidepanel .tab").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         document.querySelectorAll(".sidepanel .tab").forEach(b=>b.classList.remove("active"));
@@ -580,9 +548,9 @@
       return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`+
              `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
-    const buildQualityFile = () => `${selQual.value}.mp4`;
-    const buildAgingFile   = v => `aging-${v}.mp4`;
-    const buildThinSoloFile= () => `thinning_${selThinSolo.value}.mp4`;
+    const buildQualityFile   = () => `${selQual.value}.mp4`;
+    const buildAgingFile     = v => `aging-${v}.mp4`;
+    const buildThinSoloFile  = () => `thinning_${selThinSolo.value}.mp4`;
     const buildSubstrateFile = () => `substrate_change.mp4`;
 
     async function loadToPlayer(player, statusEl, relPath){
@@ -596,101 +564,97 @@
 
       try{player.pause();}catch{}
       player.removeAttribute("src"); player.load();
-   
-      // 🔑 자동재생 우호 속성 보강 (src 설정 전)
+
+      // 자동재생 우호 속성 보강 (src 설정 전)
       player.muted = true;
       player.setAttribute('muted','');
       player.setAttribute('playsinline','');
       player.setAttribute('webkit-playsinline','');
       player.autoplay = true;
-      
+
       player.src = withCacheBuster(url);
-      
+
       player.onerror = ()=>{ statusEl.innerHTML = `<span class="err">재생 오류: <code>${relPath}</code></span>`; };
       player.oncanplay = ()=>{ statusEl.textContent = `재생 중: ${relPath}`; };
-      
-      // 최초 제스처 이전엔 play()가 거부될 수 있음 → 실패 시 안내 문구 유지 
-      try{
-        await player.play();
-      }catch{
+
+      try{ await player.play(); }
+      catch{
         statusEl.innerHTML = `자동재생이 차단됨 → 상단 <b>둘다 재생</b> 버튼을 한 번 눌러주세요: <code>${relPath}</code>`;
       }
       return true;
     }
 
-
-    const pathForQuality  = () => `${base}/quality/${buildQualityFile()}`;
-    const pathForAging    = v => `${base}/aging/${buildAgingFile(v)}`;
-    const pathForSubstrate= () => `${base}/substrate/${buildSubstrateFile()}`;
+    const pathForQuality   = () => `${base}/quality/${buildQualityFile()}`;
+    const pathForAging     = v => `${base}/aging/${buildAgingFile(v)}`;
+    const pathForSubstrate = () => `${base}/substrate/${buildSubstrateFile()}`;
 
     // 우선순위: 품질 > 노화(both) > 노화(단일) > 배지 변화 > 솎기 단독 > 조합
     async function updateCompare(){
-      // ✅ 토글 ON: 추가 보기(품질/노화/배지/솎기단독)만 비교에 사용
+      // 토글 ON: 추가 보기(품질/노화/배지/솎기단독)만 비교에 사용
       if (extrasPinned) {
         if (selAging.value === "both") {
           cmpSingleWrap.style.display = "none";
           cmpDualWrap.style.display   = "grid";
-          const okA = await loadToPlayer(cmpPlayerA, cmpStatus, `${base}/aging/aging-15.mp4`);
-          const okB = await loadToPlayer(cmpPlayerB, cmpStatus, `${base}/aging/aging-18.mp4`);
+          const okA = await loadToPlayer(cmpPlayerA, cmpStatus, pathForAging("15"));
+          const okB = await loadToPlayer(cmpPlayerB, cmpStatus, pathForAging("18"));
           if (okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
-          unlockAutoplay();             // ⬅ 추가
+          unlockAutoplay();
           return;
         }
-        
+
         cmpDualWrap.style.display   = "none";
         cmpSingleWrap.style.display = "block";
-        
+
         let relPath = "";
         if (selQual.value !== "none") {
-          relPath = `${base}/quality/${selQual.value}.mp4`;
+          relPath = pathForQuality();
         } else if (selAging.value === "15" || selAging.value === "18") {
-          relPath = `${base}/aging/aging-${selAging.value}.mp4`;
-          await loadToPlayer(cmpPlayer, cmpStatus, relPath);
-          unlockAutoplay();               // ⬅ 추가
-          return;
-        }
+          relPath = pathForAging(selAging.value);
         } else if (selSubstrate.value === "on") {
-          relPath = `${base}/substrate/substrate_change.mp4`;
+          relPath = pathForSubstrate();
         } else if (selThinMode.value==="on" && selThinSolo.value!=="none") {
-          relPath = `${base}/thinning/thinning_${selThinSolo.value}.mp4`;
+          relPath = `${base}/thinning/${buildThinSoloFile()}`;
         } else {
-          cmpStatus.innerHTML = `추가 보기가 선택되지 않았습니다. 옵션을 선택하거나 📌 토글을 끄세요.`;
+          cmpStatus.innerHTML = `추가 보기가 선택되지 않았습니다. 옵션을 선택하거나 스위치를 끄세요.`;
           try{ cmpPlayer.pause(); }catch{}
           return;
         }
         await loadToPlayer(cmpPlayer, cmpStatus, relPath);
-        unlockAutoplay();               // ⬅ 추가
+        unlockAutoplay();
         return;
       }
-      
-      // ⬇⬇⬇ 토글 OFF: 기존 우선순위 (품질 > 노화(both) > 노화(단일) > 배지 > 솎기단독 > 조합)
-      if(selAging.value === "both"){
+
+      // 토글 OFF: 기존 우선순위
+      if (selAging.value === "both") {
         cmpSingleWrap.style.display = "none";
         cmpDualWrap.style.display   = "grid";
-        const okA = await loadToPlayer(cmpPlayerA, cmpStatus, `${base}/aging/aging-15.mp4`);
-        const okB = await loadToPlayer(cmpPlayerB, cmpStatus, `${base}/aging/aging-18.mp4`);
-        if(okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
-          unlockAutoplay();    // ⬅ 추가
+        const okA = await loadToPlayer(cmpPlayerA, cmpStatus, pathForAging("15"));
+        const okB = await loadToPlayer(cmpPlayerB, cmpStatus, pathForAging("18"));
+        if (okA && okB) cmpStatus.textContent = `2-up 재생: aging-15 / aging-18`;
+        unlockAutoplay();
         return;
       }
+
       cmpDualWrap.style.display   = "none";
       cmpSingleWrap.style.display = "block";
-      
+
       let relPath = "";
       if (selQual.value !== "none") {
-        relPath = `${base}/quality/${selQual.value}.mp4`;
+        relPath = pathForQuality();
       } else if (selAging.value === "15" || selAging.value === "18") {
-        relPath = `${base}/aging/aging-${selAging.value}.mp4`;
+        relPath = pathForAging(selAging.value);
+        await loadToPlayer(cmpPlayer, cmpStatus, relPath);
+        unlockAutoplay();
+        return;
       } else if (selSubstrate.value === "on") {
-        relPath = `${base}/substrate/substrate_change.mp4`;
+        relPath = pathForSubstrate();
       } else if (selThinMode.value==="on" && selThinSolo.value!=="none") {
-        relPath = `${base}/thinning/thinning_${selThinSolo.value}.mp4`;
+        relPath = `${base}/thinning/${buildThinSoloFile()}`;
       } else {
         relPath = `${base}/${buildComboFile()}`;
       }
       await loadToPlayer(cmpPlayer, cmpStatus, relPath);
     }
-
 
     // 버튼
     playBoth.addEventListener("click", ()=>{
@@ -724,10 +688,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
