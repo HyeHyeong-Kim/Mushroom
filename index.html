@@ -2,113 +2,110 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>버섯 생육 시뮬레이션 뷰어</title>
+<title>버섯 생육 시뮬레이션 뷰어 (Layout Refit)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-:root {
-  --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0;
-  --radius:14px; --inc:5pt;
-  --header-h:72px;
-  --gap:16px;
+:root{
+  --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
+  --radius:14px; --inc:4pt;
+  --header-h:72px; --gap:14px;
+  --video-w:clamp(20cm,22cm,25cm);
 }
-
-/* ===== 기본 설정 ===== */
-*{box-sizing:border-box}
-body {
-  margin:0; background:var(--bg); color:var(--text);
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  background:var(--bg);color:var(--text);
   font-family:system-ui,"Noto Sans KR";
   overflow:hidden;
 }
 
 /* ===== 헤더 ===== */
-header {
+header{
   height:var(--header-h);
-  display:flex; justify-content:space-between; align-items:center;
-  border-bottom:1px solid #1a2835; padding:8px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 16px;border-bottom:1px solid #16202a;
 }
-h1 {margin:0; font-size:calc(26px + var(--inc))}
-.sub {color:var(--muted); font-size:14px}
-.toolbar {display:flex; gap:8px}
-.btn {
-  padding:6px 10px; border-radius:10px;
-  border:1px solid #2a3847; background:#0f141a; color:var(--text);
-  cursor:pointer;
+h1{margin:0;font-size:calc(26px + var(--inc));}
+.sub{color:var(--muted);font-size:calc(13px + var(--inc)/2);}
+.toolbar{display:flex;gap:10px;}
+.btn{
+  padding:8px 12px;border-radius:10px;border:1px solid #2a3847;
+  background:#0f141a;color:var(--text);cursor:pointer;
 }
-.btn:hover {border-color:#415e7a}
+.btn:hover{border-color:#415e7a;}
 
-/* ===== 메인 3분할 레이아웃 ===== */
-main {
+/* ===== 메인 레이아웃 ===== */
+main{
   display:grid;
-  grid-template-columns: 28% 50% 22%; /* 좌-중-우 비율 */
+  grid-template-columns: 28% 50% 22%;
   height:calc(100vh - var(--header-h));
   gap:var(--gap);
   padding:var(--gap);
-  align-items:stretch;
   overflow:hidden;
+  align-items:stretch;
 }
 
-/* ===== 좌측 환경 패널 ===== */
-.card {
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:12px;
-  overflow:auto;
+/* ===== 좌측 환경설정 패널 ===== */
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;overflow:auto;
 }
-h2{margin:8px 0 6px; font-size:calc(15px + var(--inc))}
-label{font-size:calc(12px + var(--inc)); color:var(--muted)}
+h2{margin:8px 0;font-size:calc(15px + var(--inc));}
+label{font-size:calc(13px + var(--inc)/2);color:var(--muted);}
 select{
-  width:100%; padding:6px 8px; border-radius:8px;
-  background:#0f141a; color:#fff; border:1px solid #2a3847;
+  width:100%;padding:6px 8px;border-radius:8px;
+  background:#0f141a;color:#fff;border:1px solid #2a3847;
 }
-.row{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;}
 
 /* ===== 중앙 플레이어 ===== */
-.centerStack{
-  display:grid; grid-template-rows:1fr 1fr; gap:var(--gap);
-  background:#0f141a; border:1px solid #25374a; border-radius:var(--radius);
-  padding:10px; overflow:hidden;
+.stack{
+  display:grid;
+  grid-template-rows:1fr 1fr;
+  gap:var(--gap);
+  background:#0f141a;border-radius:var(--radius);
+  border:1px solid #25374a;padding:10px;
 }
 .vcard{
-  display:flex; flex-direction:column;
-  background:#101821; border-radius:12px; border:1px solid #25374a;
-  padding:8px; overflow:hidden;
+  display:flex;flex-direction:column;background:#101821;border-radius:12px;border:1px solid #25374a;
+  padding:8px;
 }
-.vtitle{color:#cfe1f3; margin-bottom:4px;}
-.vmedia{flex:1; display:flex; justify-content:center; align-items:center; overflow:hidden;}
-.vw{width:100%; max-width:100%; height:100%; display:flex; justify-content:center; align-items:center;}
-.vw video{width:95%; height:100%; object-fit:contain; border-radius:10px; background:#000;}
-.status{font-size:12px; color:var(--muted); min-height:1.2em;}
+.vtitle{color:#cfe1f3;margin-bottom:6px;font-size:15px;}
+.vmedia{flex:1;display:flex;justify-content:center;align-items:center;overflow:hidden;}
+.vw{width:var(--video-w);max-width:100%;height:100%;display:flex;justify-content:center;align-items:center;}
+.vw video{width:100%;height:100%;object-fit:contain;border-radius:10px;background:#000;}
+.status{font-size:12px;color:var(--muted);min-height:1.2em;}
 
-/* ===== 우측 매뉴얼 ===== */
+/* ===== 우측 표준 매뉴얼 ===== */
 .sidepanel{
-  background:#0e1319; border:1px solid #1e2a36; border-radius:var(--radius);
-  overflow:auto; padding:10px;
+  background:var(--panel);
+  border:1px solid #1e2a36;
+  border-radius:var(--radius);
+  padding:10px;
+  overflow:auto;
 }
-.sidepanel h3{margin:6px 0; font-size:15px;}
-.imgs{display:grid; grid-template-columns:repeat(2,1fr); gap:6px;}
-.imgs img{width:100%; border-radius:8px; border:1px solid #25374a;}
-.kv{display:grid; grid-template-columns:90px 1fr; color:#b1c0cf; font-size:13px; margin-top:4px;}
-.kv b{color:#e8f1f8}
+.sidepanel h3{margin:6px 0;font-size:15px;}
+.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.imgs img{width:100%;border-radius:8px;border:1px solid #25374a;}
+.kv{display:grid;grid-template-columns:90px 1fr;color:#b1c0cf;font-size:13px;margin-top:4px;}
+.kv b{color:#e8f1f8;}
 
-/* ===== 브랜드 Dock ===== */
+/* ===== 브랜드 ===== */
 .brandDock{
-  position:fixed; right:20px; bottom:16px;
-  display:flex; align-items:center; gap:12px;
-  background:rgba(20,26,32,0.85); border:1px solid #2a3847;
-  padding:8px 12px; border-radius:12px; backdrop-filter:blur(3px);
+  position:fixed;right:18px;bottom:16px;display:flex;align-items:center;gap:12px;
+  background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;
+  border-radius:12px;backdrop-filter:blur(3px);
 }
-.brandName{font-weight:800; font-size:calc(14px + var(--inc) + 3px); color:#fff;}
-.brandLogo{height:114px; width:auto; border-radius:6px; object-fit:contain;}
+.brandName{font-weight:800;font-size:calc(14px + var(--inc));color:#fff;}
+.brandLogo{height:100px;object-fit:contain;border-radius:6px;}
 
-/* ===== 반응형 ===== */
-@media (max-width: 1200px){
-  main{grid-template-columns:1fr; grid-template-rows:auto auto auto; overflow:auto;}
+@media(max-width:1200px){
+  main{grid-template-columns:1fr;grid-template-rows:auto auto auto;overflow:auto;}
   body{overflow:auto;}
 }
 </style>
 </head>
-
 <body>
 <header>
   <div>
@@ -116,13 +113,15 @@ select{
     <div class="sub">좌: 환경 설정 · 중: 영상 비교 · 우: 표준 매뉴얼</div>
   </div>
   <div class="toolbar">
+    <button id="openManual" class="btn">매뉴얼</button>
     <button id="playBoth" class="btn">재생</button>
     <button id="pauseBoth" class="btn">정지</button>
+    <button id="syncTime" class="btn">동기화</button>
   </div>
 </header>
 
 <main>
-  <!-- 좌측 환경 패널 -->
+  <!-- 좌측 환경설정 -->
   <section class="card">
     <h2>Stage1</h2>
     <div class="row">
@@ -141,8 +140,8 @@ select{
     </div>
   </section>
 
-  <!-- 중앙 플레이어 -->
-  <section class="centerStack">
+  <!-- 중앙 영상 -->
+  <section class="stack">
     <div class="vcard">
       <div class="vtitle">기준 플레이어</div>
       <div class="vmedia"><div class="vw"><video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline></video></div></div>
@@ -155,12 +154,12 @@ select{
     </div>
   </section>
 
-  <!-- 우측 매뉴얼 -->
-  <aside id="panel" class="sidepanel">
+  <!-- 우측 표준 매뉴얼 -->
+  <aside class="sidepanel">
     <h3>표준 매뉴얼</h3>
     <div class="imgs">
-      <img src="assets/입상(개봉)%201.jpg" alt="입상(개봉) 1">
-      <img src="assets/입상(개봉)%202.jpg" alt="입상(개봉) 2">
+      <img src="assets/입상(개봉) 1.jpg" alt="입상(개봉) 1">
+      <img src="assets/입상(개봉) 2.jpg" alt="입상(개봉) 2">
     </div>
     <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
   </aside>
@@ -182,61 +181,39 @@ const cmpStatus=document.getElementById("cmpStatus");
 
 let autoplayUnlocked=false;
 async function unlockAutoplay(){
-  if(autoplayUnlocked)return; autoplayUnlocked=true;
+  if(autoplayUnlocked)return;autoplayUnlocked=true;
   for(const p of [stdPlayer,cmpPlayer]){
     try{p.muted=true;p.setAttribute('muted','');p.setAttribute('playsinline','');p.autoplay=true;await p.play();}catch{}
   }
 }
 ['pointerdown','keydown','touchstart','visibilitychange'].forEach(e=>window.addEventListener(e,unlockAutoplay,{once:true}));
 
-function logStatus(m){try{console.log("[MUSHROOM]",m);}catch{}}
-const existsCache=new Map();
-async function fileExistsSmart(relPath){
-  const url=encodeURI(relPath);
-  if(existsCache.has(url))return existsCache.get(url);
-  try{const r=await fetch(url,{method:"HEAD",cache:"no-store"});if(r.ok){existsCache.set(url,true);return true;}}catch{}
-  if(url.endsWith(".mp4")){
-    const alt=url.slice(0,-4)+".MP4";
-    try{const r2=await fetch(alt,{method:"HEAD",cache:"no-store"});if(r2.ok){existsCache.set(alt,true);return alt;}}catch{}
-  }
-  if(!/\/converted\//.test(url)){
-    const conv=url.replace("/aging/","/aging/converted/");
-    try{const r3=await fetch(conv,{method:"HEAD",cache:"no-store"});if(r3.ok){existsCache.set(conv,true);return conv;}}catch{}
-  }
-  existsCache.set(url,"force");return"force";
+async function fileExistsSmart(url){
+  try{const r=await fetch(url,{method:"HEAD"});return r.ok;}catch{return false;}
 }
-const withCacheBuster=abs=>{const u=new URL(abs,location.href);u.searchParams.set("v",Date.now());return u.toString();};
-async function loadToPlayer(player,statusEl,relPath){
-  let url=relPath;
-  const test=await fileExistsSmart(relPath);
-  if(test===true){}else if(typeof test==="string"&&test!=="force"){url=test;}else if(test==="force"){logStatus(`HEAD 실패 → 강제 로드:${relPath}`);}else{
-    statusEl.innerHTML=`파일없음:<code>${relPath}</code>`;player.removeAttribute("src");player.load();return false;
-  }
-  try{player.pause();}catch{}
-  player.removeAttribute("src");player.load();
-  player.muted=true;player.setAttribute('muted','');player.setAttribute('playsinline','');player.autoplay=true;
-  const finalUrl=withCacheBuster(url);
-  player.src=finalUrl;
-  player.onerror=()=>{statusEl.innerHTML=`재생 오류:<code>${finalUrl}</code>`;};
-  player.oncanplay=()=>{statusEl.textContent=`재생 중:${finalUrl}`;};
-  try{await player.play();}catch{statusEl.innerHTML=`자동재생 차단됨→<b>재생</b>버튼 클릭`; }
-  return true;
-}
+const withCacheBuster=u=>u+"?v="+Date.now();
 
-const selAging=document.getElementById("aging");
-const selQual=document.getElementById("quality");
-async function updateCompare(){
-  let relPath="";
-  if(selQual.value!=="none")relPath=`${base}/quality/${selQual.value}.mp4`;
-  else if(selAging.value==="15"||selAging.value==="18")relPath=`${base}/aging/aging-${selAging.value}.mp4`;
-  else relPath=STANDARD_PATH;
-  await loadToPlayer(cmpPlayer,cmpStatus,relPath);
-  unlockAutoplay();
+async function loadToPlayer(p,status,rel){
+  const ok=await fileExistsSmart(rel);
+  if(!ok){status.textContent="파일없음:"+rel;return;}
+  p.src=withCacheBuster(rel);
+  try{await p.play();status.textContent="재생:"+rel;}catch{status.textContent="자동재생 차단됨";}
 }
-["change"].forEach(evt=>{
-  selAging.addEventListener(evt,updateCompare);
-  selQual.addEventListener(evt,updateCompare);
-});
+async function updateCompare(){
+  let rel="";
+  const aging=document.getElementById("aging").value;
+  const qual=document.getElementById("quality").value;
+  if(qual!=="none")rel=`${base}/quality/${qual}.mp4`;
+  else if(aging==="15"||aging==="18")rel=`${base}/aging/aging-${aging}.mp4`;
+  else rel=STANDARD_PATH;
+  await loadToPlayer(cmpPlayer,cmpStatus,rel);
+}
+document.getElementById("playBoth").onclick=()=>{stdPlayer.play();cmpPlayer.play();};
+document.getElementById("pauseBoth").onclick=()=>{stdPlayer.pause();cmpPlayer.pause();};
+document.getElementById("syncTime").onclick=()=>{cmpPlayer.currentTime=stdPlayer.currentTime;};
+document.getElementById("aging").onchange=updateCompare;
+document.getElementById("quality").onchange=updateCompare;
+
 (async()=>{await loadToPlayer(stdPlayer,stdStatus,STANDARD_PATH);await updateCompare();})();
 </script>
 </body>
