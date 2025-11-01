@@ -46,47 +46,63 @@
     }
     .btn:hover{border-color:#415e7a}
     /* 추가 보기 헤더 + 토글 스위치 */
+    
+    /* 추가 보기 헤더 + 토글 스위치 (ON/OFF 텍스트 포함, 정렬 보정 완료) */
     .extrasHeader{
       display:flex; align-items:center; justify-content:space-between;
       gap:12px; margin:8px 0 6px;
     }
     .extrasToggle{
-      display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none;
+      display:flex; align-items:center; gap:10px; user-select:none;
       font-size:calc(12px + var(--inc)); color:var(--muted);
     }
-    .extrasToggle input{
-      appearance:none; width:42px; height:24px; border-radius:999px;
-      background:#2a3847; position:relative; outline:none; border:1px solid #3a556e;
-      transition:.2s;
+    .extrasToggle .labelText{ white-space:nowrap; }
+    
+    .extrasToggle .switch{
+      position:relative; width:64px; height:28px; flex:0 0 auto;
     }
-    .extrasToggle input:checked{ background:#2b4e68; border-color:#4fa3d1; }
-    .extrasToggle .knob{
-      position:absolute; width:18px; height:18px; border-radius:50%;
-      background:#fff; transform:translateX(3px); transition:.2s; pointer-events:none;
+    .extrasToggle .switch input{
+      appearance:none; -webkit-appearance:none; outline:none; cursor:pointer;
+      position:absolute; inset:0; margin:0; padding:0; background:transparent; border:0;
+      z-index:3; /* 가장 위에서 클릭을 받게 */
     }
-    .extrasToggle input:checked + .knob{ transform:translateX(21px); }
-
-
-    /* 📌 추가 보기 버튼 활성화 상태 */
-    #extrasPin[aria-pressed="true"] {
-      background-color: #2b4e68;
-      border-color: #4fa3d1;
-      color: #ffffff;
-      box-shadow: 0 0 8px rgba(79,163,209,0.5);
+    .extrasToggle .switch .track{
+      position:absolute; inset:0;
+      border-radius:999px; background:#2a3847; border:1px solid #3a556e;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 8px; box-sizing:border-box;
+      color:#cfe3f7; font-size:11px; font-weight:600;
+      transition:background-color .2s, border-color .2s;
+      z-index:1;
     }
-    #extrasPin:hover {
-      background-color: #1d2c3a;
+    .extrasToggle .switch .state.off{ opacity:1; }
+    .extrasToggle .switch .state.on { opacity:.45; }
+    
+    .extrasToggle .switch .thumb{
+      position:absolute; top:50%; left:3px;
+      width:22px; height:22px; border-radius:50%;
+      background:#ffffff; transform:translateY(-50%);
+      box-shadow:0 2px 6px rgba(0,0,0,.25);
+      transition:left .2s ease;
+      z-index:2;
     }
-
+    
+    /* 체크되면 파란 트랙 + ON 강조 + 손잡이 우측 정렬 */
+    .extrasToggle .switch input:checked ~ .track{
+      background:#2b4e68; border-color:#4fa3d1;
+    }
+    .extrasToggle .switch input:checked ~ .track .state.off{ opacity:.45; }
+    .extrasToggle .switch input:checked ~ .track .state.on { opacity:1; }
+    
+    .extrasToggle .switch input:checked ~ .thumb{
+      left: calc(100% - 3px - 22px); /* 우측 3px 여백 */
+    }
+    
     /* 추가 보기 안내문 */
-    .extrasHint {
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-      margin-bottom:10px;
-      line-height:1.4;
+    .extrasHint{
+      font-size:12px; color:var(--muted);
+      margin-top:2px; margin-bottom:10px; line-height:1.4;
     }
-
 
     /* ===== Main 레이아웃 ===== */
     main{
@@ -220,22 +236,24 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
     .kv b{color:#e8f1f8}
     .closeX{padding:6px 10px}
   
+  /* 우측 하단 도킹된 브랜드 영역 (중앙 정렬 + 로고 3배) */
   .brandDock{
     position:fixed; right:16px; bottom:16px; z-index:60;
-    display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; gap:12px;
     background:rgba(20,26,32,0.85); border:1px solid #2a3847;
-    padding:6px 10px; border-radius:10px; backdrop-filter: blur(2px);
+    padding:8px 12px; border-radius:12px; backdrop-filter:blur(2px);
   }
   .brandName{
-    font-weight:700;                /* 굵게 */
-    font-size:calc(14px + var(--inc) + 3px); /* +3pt 상당의 증가 */
-    color:#e9f0f5; white-space:nowrap;
+    font-weight:800; /* 굵게 */
+    font-size:calc(14px + var(--inc) + 3px); /* +3pt 느낌 */
+    color:#e9f0f5; white-space:nowrap; line-height:1.1; text-align:center;
   }
   .brandLogo{
-    height:38px; width:auto; border-radius:4px;
+    height:114px; /* 38px → 3배 */
+    width:auto; border-radius:6px; object-fit:contain;
   }
-
-    /* 작은 화면 대응 */
+  
+  /* 작은 화면 대응 */
     @media (max-width: 1200px){
       body{ overflow:auto; }
       main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
@@ -331,19 +349,26 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
         </div>
       </div>
 
-      <h2>추가 보기 (환경조건 무관)</h2>
-      <!-- ⬇ 추가 보기 타이틀+우측 on/off 스위치 (교체) -->
+<!-- ▶ 추가 보기 (환경조건 무관) 헤더 + 토글 + 안내문구  [왼쪽 패널 내, Stage2 다음 섹션] -->
       <div class="extrasHeader">
         <h2 style="margin:0;">추가 보기 (환경조건 무관)</h2>
         <label class="extrasToggle">
-          <span>비교에 적용</span>
-          <input type="checkbox" id="extrasPinSwitch" />
-          <i class="knob" aria-hidden="true"></i>
+          <span class="labelText">비교에 적용</span>
+          <!-- 스위치: input + 트랙(OFF/ON) + 손잡이 -->
+          <div class="switch">
+            <input type="checkbox" id="extrasPinSwitch" />
+            <div class="track">
+              <span class="state off">OFF</span>
+              <span class="state on">ON</span>
+            </div>
+            <div class="thumb" aria-hidden="true"></div>
+          </div>
         </label>
       </div>
       <p class="extrasHint">
         OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교
       </p>
+
 
       <div class="row">
         <div>
@@ -713,6 +738,7 @@ openManual.addEventListener('click', unlockAutoplay, { once:true });
   </script>
 </body>
 </html>
+
 
 
 
