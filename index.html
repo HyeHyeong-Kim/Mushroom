@@ -10,12 +10,16 @@
       --radius:14px; --inc:5pt;
       --header-h:72px; --gap:12px;
 
+      /* ▶ 요구사항 반영 */
+      --left-col: 15cm;     /* 좌측 패널 폭 고정 */
+      --left-gap: 1cm;      /* 페이지 왼쪽 여백 */
+      --page-pad: 48px;     /* 그리드 여유 패딩(우측) */
+
       /* ▶ 플레이어 가로폭: 20–25cm에서 22cm 선호 */
       --video-w: clamp(20cm, 22cm, 25cm);
-      /* ▶ 뷰포트 가용폭을 초과하지 않도록 안전 한계 (좌측 패널+여백 제외) */
-      --left-col: 340px;      /* 좌측 패널 기준 폭 */
-      --page-pad: 48px;       /* main 좌우 패딩 및 그리드 간격 여유치 */
-      --safe-w: calc(100vw - var(--left-col) - var(--page-pad));
+
+      /* ▶ 안전 폭: 뷰포트에서 좌측 패널+여백+패딩 제외 */
+      --safe-w: calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -23,14 +27,15 @@
       margin:0; background:var(--bg); color:var(--text);
       font-family:system-ui, Arial, "Noto Sans KR";
       font-size:calc(17px + var(--inc)); line-height:1.5;
-      overflow:hidden; /* 한 화면에 고정 (전체 스크롤 제거) */
+      overflow:hidden; /* 한 화면 수납 */
     }
 
-    /* ===== Header (제목 잘림 방지: 이동 없음, 상단 고정 높이) ===== */
+    /* ===== Header ===== */
     header{
       height:var(--header-h);
       display:flex; align-items:center; justify-content:space-between;
       gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
+      /* 이동 제거: 제목 잘림 방지, 표준 위치 */
     }
     h1{margin:0; font-size:calc(24px + var(--inc))}
     .sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
@@ -41,17 +46,19 @@
     }
     .btn:hover{border-color:#415e7a}
 
-    /* ===== Main: 좌측 패널 + 우측 영상 2단 (스크롤 없이 100vh 수납) ===== */
+    /* ===== Main 레이아웃 ===== */
     main{
       height:calc(100vh - var(--header-h));
       display:grid;
-      grid-template-columns: var(--left-col) 1fr;  /* 좌측 패널 고정폭, 우측 확장 */
+      grid-template-columns: var(--left-col) 1fr;  /* 좌측 15cm 고정 */
       gap:var(--gap);
       padding:var(--gap) 16px var(--gap) 16px;
+      padding-left: calc(16px + var(--left-gap));  /* 왼쪽 여백 1cm */
       align-items:stretch;
+      min-width: 0; /* 안전 */
     }
 
-    /* ===== 좌측 컨트롤 (항상 보이도록, 내부 스크롤만 허용) ===== */
+    /* ===== 좌측 컨트롤 (내부 스크롤만 허용) ===== */
     .card{
       background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
       padding:12px; overflow:auto; min-height:0;
@@ -78,13 +85,13 @@
     .vtitle{display:flex; align-items:center; gap:8px; margin:0 0 6px; color:#cfe1f3; font-size:calc(13px + var(--inc))}
     .badge{font-size:calc(10px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
 
-    /* ▶ 플레이어 가로폭 고정(20~25cm) + 뷰포트 안전폭 제한 */
+    /* ▶ 플레이어 폭 고정(20–25cm) + 안전 폭 제한 */
     .vmedia{
       flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:stretch;
     }
     .vw{
       width:var(--video-w);
-      max-width:var(--safe-w);     /* 화면에서 좌측 패널을 제외한 안전 폭 */
+      max-width:var(--safe-w);     /* 좌측 패널+여백 제외한 영역 안에서만 확대 */
       display:block;
     }
     .vw video{
@@ -101,23 +108,34 @@
     .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
     .err{color:#f7b5b5}
 
-    /* 사이드 패널 (필요 시 열어 사용, 내부 스크롤) */
+    /* ===== 사이드 패널(표준 매뉴얼) - 활성화 ===== */
     .sidepanel{
       position:fixed; top:0; right:0; width:460px; max-width:92vw; height:100vh; background:var(--panel);
       border-left:1px solid #1c2a38; transform:translateX(100%); transition:.28s ease;
-      display:flex; flex-direction:column; z-index:50
+      display:flex; flex-direction:column; z-index:50;
+      pointer-events:auto; /* 클릭 가능 */
     }
     .sidepanel.open{transform:translateX(0)}
     .phead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-bottom:1px solid #1c2a38}
     .tabs{display:flex; gap:8px}
-    .tab{padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38; color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc))}
+    .tab{
+      padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38;
+      color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc))
+    }
     .tab.active{background:#1b2735; border-color:#35506d}
     .pcontent{padding:12px 14px; overflow:auto; flex:1}
+    .stage{margin-bottom:12px; border:1px solid #1f2b38; border-radius:12px; padding:10px; background:#0c1117}
+    .stage h3{margin:0 0 6px; font-size:calc(14px + var(--inc))}
+    .imgs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px}
+    .imgs img{width:100%; height:120px; object-fit:cover; border-radius:10px; border:1px solid #25374a}
+    .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:calc(12px + var(--inc)); color:#b1c0cf; margin-top:4px}
+    .kv b{color:#e8f1f8}
+    .closeX{padding:6px 10px}
 
-    /* 🌐 작은 화면 대응: 전체 스크롤 허용 + 단일 컬럼 */
+    /* 작은 화면 대응 */
     @media (max-width: 1200px){
       body{ overflow:auto; }
-      main{ grid-template-columns:1fr; height:auto; }
+      main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
       .stack{ grid-template-rows:auto; }
       .vw{ width:100%; max-width:100%; }
     }
@@ -130,16 +148,16 @@
       <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
     </div>
     <div class="toolbar">
-      <button id="openManual" class="btn">재배 매뉴얼 열기</button>
-      <button id="playBoth" class="btn">둘다 재생</button>
-      <button id="pauseBoth" class="btn">둘다 정지</button>
-      <button id="syncTime" class="btn">동기화</button>
+      <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
+      <button id="playBoth" class="btn" type="button">둘다 재생</button>
+      <button id="pauseBoth" class="btn" type="button">둘다 정지</button>
+      <button id="syncTime" class="btn" type="button">동기화</button>
     </div>
   </header>
 
   <main>
-    <!-- 좌측 컨트롤 -->
-    <section class="card">
+    <!-- 좌측 컨트롤 (15cm + 좌 여백 1cm) -->
+    <section class="card" aria-label="환경 설정">
       <h2>Stage1</h2>
       <div class="row">
         <div>
@@ -292,18 +310,62 @@
     </section>
   </main>
 
-  <!-- 사이드 패널(필요 시 열어 사용) -->
+  <!-- ===== 표준 매뉴얼(사이드 패널) ===== -->
   <aside id="panel" class="sidepanel" aria-hidden="true">
     <div class="phead">
       <strong>표준 매뉴얼</strong>
       <div class="tabs">
-        <button class="tab active" data-tab="manual">매뉴얼</button>
-        <button class="tab" data-tab="env">환경조건</button>
+        <button class="tab active" data-tab="manual" type="button">매뉴얼</button>
+        <button class="tab" data-tab="env" type="button">환경조건</button>
       </div>
-      <button id="closeManual" class="btn">닫기</button>
+      <button id="closeManual" class="btn closeX" type="button">닫기</button>
     </div>
     <div class="pcontent">
-      <p style="color:#9fb0c0;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
+      <!-- 기본 활성 탭: manual -->
+      <div id="manual" class="tabpage" style="display:block;">
+        <div class="stage">
+          <h3>① 입상(개봉)</h3>
+          <div class="imgs">
+            <img src="assets/입상(개봉)_1.jpg" alt="입상(개봉) 1">
+            <img src="assets/입상(개봉)_2.jpg" alt="입상(개봉) 2">
+          </div>
+          <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
+          <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
+        </div>
+        <div class="stage">
+          <h3>② 발이 후 생육</h3>
+          <div class="imgs"><img src="assets/발이 후 생육.jpg" alt="발이 후 생육"></div>
+          <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기</span></div>
+          <div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div>
+        </div>
+        <div class="stage">
+          <h3>③ 솎기</h3>
+          <div class="imgs"><img src="assets/솎기.jpg" alt="솎기"></div>
+          <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아 균일 생육 확보</span></div>
+        </div>
+        <div class="stage">
+          <h3>④ 솎기 후 생육</h3>
+          <div class="imgs">
+            <img src="assets/솎기 후 생육_1.jpg" alt="솎기 후 생육 1">
+            <img src="assets/솎기 후 생육_2.jpg" alt="솎기 후 생육 2">
+          </div>
+          <div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯, 광/환기 관리 중요</span></div>
+        </div>
+        <div class="stage">
+          <h3>⑤ 수확</h3>
+          <div class="imgs"><img src="assets/수확_1.jpg" alt="수확"></div>
+          <div class="kv"><b>설명</b><span>품질 구분: 특상 / 상 / 보통</span></div>
+        </div>
+      </div>
+
+      <div id="env" class="tabpage" style="display:none;">
+        <h3>기본 환경조건</h3>
+        <ul>
+          <li>입상(개봉): 온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
+          <li>발이 후 생육: 온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
+        </ul>
+        <p style="color:#9fb0c0;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
+      </div>
     </div>
   </aside>
 
@@ -340,30 +402,48 @@
     const pauseBoth = document.getElementById("pauseBoth");
     const syncTime  = document.getElementById("syncTime");
 
-    // side panel
+    // ===== 사이드 패널(표준 매뉴얼) 활성화 =====
     const panel = document.getElementById("panel");
     const openManual = document.getElementById("openManual");
     const closeManual = document.getElementById("closeManual");
-    openManual?.addEventListener("click", ()=>{ panel.classList.add("open"); panel.setAttribute("aria-hidden","false"); });
-    closeManual?.addEventListener("click", ()=>{ panel.classList.remove("open"); panel.setAttribute("aria-hidden","true"); });
+    openManual.addEventListener("click", ()=>{
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden","false");
+    });
+    closeManual.addEventListener("click", ()=>{
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden","true");
+    });
 
-    // cache HEAD
+    // 탭 전환 (기본 manual 탭을 보이도록)
+    document.querySelectorAll(".sidepanel .tab").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".sidepanel .tab").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".sidepanel .tabpage").forEach(p=>p.style.display="none");
+        document.getElementById(btn.dataset.tab).style.display="block";
+      });
+    });
+
+    // HEAD 캐시
     const existsCache = new Map();
     async function fileExists(url){
       if(existsCache.has(url)) return existsCache.get(url);
       try{ const r=await fetch(url,{method:"HEAD"}); existsCache.set(url,r.ok); return r.ok; }
       catch{ existsCache.set(url,false); return false; }
     }
-    function withCacheBuster(url){ const u=new URL(url,location.href); u.searchParams.set("v",Date.now()); return u.toString(); }
+    const withCacheBuster = url => {
+      const u=new URL(url,location.href); u.searchParams.set("v",Date.now()); return u.toString();
+    };
 
     function buildComboFile(){
       return `mushroom_S1T${selS1T.value}_H${selS1H.value}_L${selS1L.value}`+
              `_S2T${selS2T.value}_H${selS2H.value}_L${selS2L.value}_T10.mp4`;
     }
-    function buildQualityFile(){ return `${selQual.value}.mp4`; }
-    function buildAgingFile(v){ return `aging-${v}.mp4`; } // "15" | "18"
-    function buildThinSoloFile(){ return `thinning_${selThinSolo.value}.mp4`; }
-    function buildSubstrateFile(){ return `substrate_change.mp4`; }
+    const buildQualityFile = () => `${selQual.value}.mp4`;
+    const buildAgingFile   = v => `aging-${v}.mp4`;
+    const buildThinSoloFile= () => `thinning_${selThinSolo.value}.mp4`;
+    const buildSubstrateFile = () => `substrate_change.mp4`;
 
     async function loadToPlayer(player,statusEl,relPath){
       const url = encodeURI(relPath);
@@ -383,11 +463,11 @@
       return true;
     }
 
-    function pathForQuality(){ return `${base}/quality/${buildQualityFile()}`; }
-    function pathForAging(v){ return `${base}/aging/${buildAgingFile(v)}`; }
-    function pathForSubstrate(){ return `${base}/substrate/${buildSubstrateFile()}`; }
+    const pathForQuality  = () => `${base}/quality/${buildQualityFile()}`;
+    const pathForAging    = v => `${base}/aging/${buildAgingFile(v)}`;
+    const pathForSubstrate= () => `${base}/substrate/${buildSubstrateFile()}`;
 
-    // 우선순위: 품질 > 노화(both) > 노화(단일) > 배지 변화 > 솎기 단독 > 조합영상
+    // 우선순위: 품질 > 노화(both) > 노화(단일) > 배지 변화 > 솎기 단독 > 조합
     async function updateCompare(){
       if(selAging.value === "both"){
         cmpSingleWrap.style.display = "none";
@@ -417,7 +497,7 @@
       await loadToPlayer(cmpPlayer, cmpStatus, relPath);
     }
 
-    // controls
+    // 버튼
     playBoth.addEventListener("click", ()=>{
       try{ stdPlayer.play(); }catch{}
       try{ cmpPlayer.play(); }catch{}
@@ -437,11 +517,11 @@
       }catch{}
     });
 
-    // change events
+    // 변경 이벤트
     [selS1T, selS1L, selS1H, selS2T, selS2H, selS2L, selQual, selAging, selThinMode, selThinSolo, selSubstrate]
       .forEach(el=> el.addEventListener("change", updateCompare));
 
-    // init
+    // 초기 로드
     (async ()=>{
       await loadToPlayer(stdPlayer, stdStatus, STANDARD_PATH);
       await updateCompare();
