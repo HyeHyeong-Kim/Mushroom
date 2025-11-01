@@ -15,109 +15,93 @@
   --video-w: clamp(20cm, 22cm, 25cm);
 }
 *{box-sizing:border-box;}
-html,body{height:100%}
-body{
-  margin:0; background:var(--bg); color:var(--text);
-  font-family:system-ui, Arial, "Noto Sans KR";
-  font-size:calc(17px + var(--inc)); line-height:1.5;
-  overflow:hidden;
-}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+font-family:system-ui,Arial,"Noto Sans KR";font-size:calc(17px + var(--inc));line-height:1.5;overflow:hidden;}
 header{
-  height:var(--header-h);
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
+  height:var(--header-h);display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:8px 16px;border-bottom:1px solid #16202a;
 }
-h1{margin:0; font-size:calc(27px + var(--inc))}
-.sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
-.toolbar{display:flex; gap:10px;}
-.btn{
-  padding:8px 12px; border-radius:12px; border:1px solid #2a3847;
-  background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc));
-}
+h1{margin:0;font-size:calc(27px + var(--inc))}
+.sub{color:var(--muted);font-size:calc(12px + var(--inc));margin-top:2px}
+.toolbar{display:flex;gap:10px;}
+.btn{padding:8px 12px;border-radius:12px;border:1px solid #2a3847;background:#0f141a;color:var(--text);cursor:pointer;font-size:calc(14px + var(--inc));}
 .btn:hover{border-color:#415e7a}
 
 /* ===== Layout ===== */
 main{
   height:calc(100vh - var(--header-h));
-  display:grid;
-  grid-template-columns: var(--left-col) 1fr;
-  gap:var(--gap);
-  padding:var(--gap) 16px;
-  padding-left: calc(16px + var(--left-gap));
-  align-items:stretch;
-  overflow:hidden;
+  display:grid;grid-template-columns:var(--left-col) 1fr;gap:var(--gap);
+  padding:var(--gap) 16px;padding-left:calc(16px + var(--left-gap));align-items:stretch;overflow:hidden;
 }
 
 /* 좌측 컨트롤 */
 .card{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  padding:12px; overflow:auto;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;overflow:auto;
 }
-h2{margin:8px 0; font-size:calc(16px + var(--inc))}
-label{font-size:calc(12px + var(--inc)); display:block; margin:8px 0 6px; color:var(--muted)}
+h2{margin:8px 0;font-size:calc(16px + var(--inc))}
+label{font-size:calc(12px + var(--inc));display:block;margin:8px 0 6px;color:var(--muted)}
 select{
-  width:100%; padding:8px 10px; border-radius:10px;
-  background:#0f141a; color:#fff; border:1px solid #2a3847;
+  width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#fff;border:1px solid #2a3847;
 }
-.row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* 추가 보기 스위치 */
-.extrasHeader{display:flex; align-items:center; justify-content:space-between; margin:8px 0 6px;}
-.extrasToggle{display:flex; align-items:center; gap:10px; user-select:none; font-size:calc(12px + var(--inc)); color:var(--muted);}
-.extrasToggle .switch{position:relative; width:64px; height:28px;}
-.extrasToggle .switch input{appearance:none; outline:none; cursor:pointer; position:absolute; inset:0; margin:0; background:transparent; border:0; z-index:3;}
-.extrasToggle .switch .track{position:absolute; inset:0; border-radius:999px; background:#2a3847; border:1px solid #3a556e;}
-.extrasToggle .switch .thumb{position:absolute; top:50%; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transform:translateY(-50%); transition:left .2s ease;}
-.extrasToggle .switch input:checked ~ .track{background:#2b4e68; border-color:#4fa3d1;}
-.extrasToggle .switch input:checked ~ .thumb{left:calc(100% - 3px - 22px);}
+.extrasHeader{display:flex;align-items:center;justify-content:space-between;margin:8px 0 6px;}
+.extrasToggle{display:flex;align-items:center;gap:10px;user-select:none;font-size:calc(12px + var(--inc));color:var(--muted);}
+.extrasToggle .switch{position:relative;width:64px;height:28px;}
+.extrasToggle .switch input{appearance:none;outline:none;cursor:pointer;position:absolute;inset:0;margin:0;background:transparent;border:0;z-index:3;}
+.extrasToggle .switch .track{position:absolute;inset:0;border-radius:999px;background:#2a3847;border:1px solid #3a556e;}
+.extrasToggle .switch .thumb{position:absolute;top:50%;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transform:translateY(-50%);transition:left .2s ease;}
+.extrasToggle .switch input:checked~.track{background:#2b4e68;border-color:#4fa3d1;}
+.extrasToggle .switch input:checked~.thumb{left:calc(100% - 3px - 22px);}
 
 /* ===== 영상 ===== */
 .stack{
-  display:grid; gap:var(--gap);
-  grid-template-rows: 1fr 1fr;
-  overflow-y:auto;
-  padding-bottom:1rem;
+  display:grid;gap:var(--gap);
+  grid-template-rows:1fr 1fr;
+  height:calc(100vh - var(--header-h) - var(--gap)*2);
+  overflow:hidden;
 }
 .vcard{
-  background:#0e1319; border:1px solid #1e2a36; border-radius:var(--radius);
-  padding:8px; display:flex; flex-direction:column; align-items:center;
+  background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
+  display:flex;flex-direction:column;align-items:center;
 }
-.vtitle{display:flex; align-items:center; gap:8px; margin-bottom:6px; color:#cfe1f3;}
-.badge{font-size:12px; padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
-.vmedia{flex:1 1 auto; display:flex; justify-content:center;}
+.vtitle{display:flex;align-items:center;gap:8px;margin:6px 0;color:#cfe1f3;font-size:15px;}
+.badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
+.vmedia{flex:1;display:flex;justify-content:center;align-items:center;}
 .vmedia video{
-  width:var(--video-w); border-radius:10px; background:#000; object-fit:contain;
-  position:relative; left:-10cm;           /* ← 좌측으로 10cm 이동 */
-  height:calc(100% - 2cm);                /* ← 높이 2cm 축소 */
+  width:var(--video-w);height:calc(50vh - 6rem);border-radius:10px;background:#000;object-fit:contain;
+  position:relative;left:-10cm;
 }
-.status{font-size:13px; color:var(--muted); margin-top:4px;}
+.status{font-size:13px;color:var(--muted);margin-bottom:4px;}
 
 /* 표준 매뉴얼 */
 .sidepanel{
-  position:fixed; top:0; right:0; width:460px; height:100vh; background:var(--panel);
-  border-left:1px solid #1c2a38; transform:translateX(100%); transition:.3s;
-  display:flex; flex-direction:column; z-index:50;
+  position:fixed;top:0;right:0;width:460px;height:100vh;background:var(--panel);
+  border-left:1px solid #1c2a38;transform:translateX(100%);transition:.3s;
+  display:flex;flex-direction:column;z-index:50;
 }
 .sidepanel.open{transform:translateX(0);}
-.phead{display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-bottom:1px solid #1c2a38;}
-.tabs{display:flex; gap:8px;}
-.tab{padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38; color:#cfe3f7; cursor:pointer;}
-.tab.active{background:#1b2735; border-color:#35506d;}
-.pcontent{padding:12px 14px; overflow:auto; flex:1;}
-.stage{margin-bottom:12px; border:1px solid #1f2b38; border-radius:12px; padding:10px; background:#0c1117;}
-.stage h3{margin:0 0 6px;}
-.imgs{display:grid; grid-template-columns:repeat(2,1fr); gap:6px;}
-.imgs img{width:100%; height:120px; object-fit:cover; border-radius:10px; border:1px solid #25374a;}
-.kv{display:grid; grid-template-columns:100px 1fr; gap:6px; color:#b1c0cf; margin-top:4px;}
+.phead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #1c2a38;}
+.tabs{display:flex;gap:8px;}
+.tab{padding:8px 12px;border-radius:10px;background:#101823;border:1px solid #1f2b38;color:#cfe3f7;cursor:pointer;}
+.tab.active{background:#1b2735;border-color:#35506d;}
+.pcontent{padding:12px 14px;overflow:auto;flex:1;font-size:14px;} /* ← 전체 폰트 약간 축소 */
+.stage{margin-bottom:12px;border:1px solid #1f2b38;border-radius:12px;padding:10px;background:#0c1117;}
+.stage h3{margin:0 0 6px;font-size:15px;}
+.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a;}
+.kv{display:grid;grid-template-columns:100px 1fr;gap:6px;color:#b1c0cf;margin-top:4px;font-size:13px;}
 .kv b{color:#e8f1f8;}
 
 /* 로고 */
 .brandDock{
-  position:fixed; right:16px; bottom:16px; display:flex; align-items:center; gap:12px;
-  background:rgba(20,26,32,0.85); border:1px solid #2a3847; padding:8px 12px; border-radius:12px;
+  position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:12px;
+  background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;
 }
-.brandName{font-weight:800; font-size:17px; color:#e9f0f5;}
-.brandLogo{height:96px; width:auto;}
+.brandName{font-weight:800;font-size:17px;color:#e9f0f5;}
+.brandLogo{height:96px;width:auto;}
 </style>
 </head>
 <body>
@@ -152,7 +136,7 @@ select{
   </section>
 </main>
 
-<!-- ✅ 표준 매뉴얼 복구 버전 -->
+<!-- 표준 매뉴얼 -->
 <aside id="panel" class="sidepanel">
   <div class="phead">
     <strong>표준 매뉴얼</strong>
@@ -164,33 +148,11 @@ select{
   </div>
   <div class="pcontent">
     <div id="manual" class="tabpage" style="display:block;">
-      <div class="stage">
-        <h3>① 입상(개봉)</h3>
-        <div class="imgs"><img src="assets/입상(개봉)_1.jpg"><img src="assets/입상(개봉)_2.jpg"></div>
-        <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작. 표면이 건조되지 않도록 관리</span></div>
-        <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
-      </div>
-      <div class="stage">
-        <h3>② 발이 후 생육</h3>
-        <div class="imgs"><img src="assets/발이 후 생육.jpg"></div>
-        <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기. 광·습도 조절로 균일한 생육 유도</span></div>
-        <div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div>
-      </div>
-      <div class="stage">
-        <h3>③ 솎기</h3>
-        <div class="imgs"><img src="assets/솎기.jpg"></div>
-        <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아내어 공간 확보, 통풍 개선</span></div>
-      </div>
-      <div class="stage">
-        <h3>④ 솎기 후 생육</h3>
-        <div class="imgs"><img src="assets/솎기 후 생육_1.jpg"><img src="assets/솎기 후 생육_2.jpg"></div>
-        <div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯 관리 단계. 광·환기 관리 중요</span></div>
-      </div>
-      <div class="stage">
-        <h3>⑤ 수확</h3>
-        <div class="imgs"><img src="assets/수확_1.jpg"></div>
-        <div class="kv"><b>설명</b><span>버섯 갓이 완전히 개화하기 전 수확. 품질 구분: 특상 / 상 / 보통</span></div>
-      </div>
+      <div class="stage"><h3>① 입상(개봉)</h3><div class="imgs"><img src="assets/입상(개봉)_1.jpg"><img src="assets/입상(개봉)_2.jpg"></div><div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작. 표면이 건조되지 않도록 관리</span></div><div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div></div>
+      <div class="stage"><h3>② 발이 후 생육</h3><div class="imgs"><img src="assets/발이 후 생육.jpg"></div><div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기. 광·습도 조절로 균일한 생육 유도</span></div><div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div></div>
+      <div class="stage"><h3>③ 솎기</h3><div class="imgs"><img src="assets/솎기.jpg"></div><div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아내어 공간 확보, 통풍 개선</span></div></div>
+      <div class="stage"><h3>④ 솎기 후 생육</h3><div class="imgs"><img src="assets/솎기 후 생육_1.jpg"><img src="assets/솎기 후 생육_2.jpg"></div><div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯 관리 단계. 광·환기 관리 중요</span></div></div>
+      <div class="stage"><h3>⑤ 수확</h3><div class="imgs"><img src="assets/수확_1.jpg"></div><div class="kv"><b>설명</b><span>버섯 갓이 완전히 개화하기 전 수확. 품질 구분: 특상 / 상 / 보통</span></div></div>
     </div>
     <div id="env" class="tabpage" style="display:none;">
       <h3>기본 환경조건</h3>
@@ -213,7 +175,6 @@ const cmpStatus=document.getElementById("cmpStatus");
 const extrasSwitch=document.getElementById("extrasSwitch");
 let extrasOn=false;
 
-// 매뉴얼 탭
 document.querySelectorAll(".tab").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
@@ -232,13 +193,7 @@ document.getElementById("closeManual").onclick=()=>panel.classList.remove("open"
 
 async function fileExists(u){try{return (await fetch(u,{method:"HEAD"})).ok}catch{return false}}
 async function ensurePlay(p){try{p.muted=true;p.setAttribute("playsinline","");await p.play();}catch{}}
-async function loadToPlayer(player,status,path){
-  const ok=await fileExists(path);
-  if(!ok){status.textContent="파일 없음: "+path;return;}
-  player.src=path;
-  await ensurePlay(player);
-  status.textContent="재생 중: "+path.split('/').pop();
-}
+async function loadToPlayer(player,status,path){const ok=await fileExists(path);if(!ok){status.textContent="파일 없음: "+path;return;}player.src=path;await ensurePlay(player);status.textContent="재생 중: "+path.split('/').pop();}
 
 async function updateCompare(){
   let rel="";
@@ -260,6 +215,7 @@ async function updateCompare(){
   }
   await loadToPlayer(cmp,cmpStatus,rel);
 }
+
 (async()=>{
   await loadToPlayer(std,stdStatus,`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`);
   await updateCompare();
