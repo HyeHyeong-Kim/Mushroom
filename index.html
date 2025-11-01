@@ -1,397 +1,195 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>버섯 생육 시뮬레이션 뷰어</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
-      --radius:14px; --inc:5pt;
-      --header-h:72px; --gap:12px;
+<meta charset="utf-8" />
+<title>버섯 생육 시뮬레이션 뷰어</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
+  --radius:14px; --inc:5pt; --header-h:72px; --gap:12px;
+  --left-col:25vw; /* 왼쪽 패널 약 25% */
+  --center-col:50vw; /* 플레이어 중앙 50% */
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+  font-family:system-ui, Arial, "Noto Sans KR";font-size:calc(17px + var(--inc));line-height:1.5;overflow:hidden;
+}
+header{
+  height:var(--header-h);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:8px 16px;border-bottom:1px solid #16202a;
+}
+h1{margin:0;font-size:calc(27px + var(--inc))}
+.sub{color:var(--muted);font-size:calc(12px + var(--inc))}
+.toolbar{display:flex;gap:10px}
+.btn{
+  padding:8px 12px;border-radius:12px;border:1px solid #2a3847;
+  background:#0f141a;color:var(--text);cursor:pointer;font-size:calc(14px + var(--inc));
+}
+.btn:hover{border-color:#415e7a}
 
-      --left-col: 15cm;
-      --left-gap: 1cm;
-      --page-pad: 48px;
+/* ===== 메인 레이아웃 ===== */
+main{
+  display:grid;
+  grid-template-columns: var(--left-col) var(--center-col) 1fr;
+  grid-template-rows: calc(100vh - var(--header-h));
+  height:calc(100vh - var(--header-h));
+  gap:var(--gap);
+  padding:var(--gap);
+}
 
-      --video-w: clamp(20cm, 22cm, 25cm);
-      --safe-w: calc(100vw - var(--left-col) - var(--left-gap) - var(--page-pad));
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:system-ui, Arial, "Noto Sans KR";
-      font-size:calc(17px + var(--inc)); line-height:1.5;
-      overflow:hidden;
-    }
+/* 좌측 환경패널 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;overflow:auto;}
+h2{margin:8px 0;font-size:calc(16px + var(--inc))}
+label{font-size:calc(12px + var(--inc));display:block;margin:8px 0 6px;color:var(--muted)}
+select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#fff;border:1px solid #2a3847;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.hint{font-size:calc(11px + var(--inc));color:var(--muted);margin-top:8px;line-height:1.45;word-break:break-all}
 
-    header{
-      height:var(--header-h);
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px; padding:8px 16px; border-bottom:1px solid #16202a;
-    }
-    h1{margin:0; font-size:calc(27px + var(--inc))}
-    .sub{color:var(--muted); font-size:calc(12px + var(--inc)); margin-top:2px}
-    .toolbar{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
-      padding:8px 12px; border-radius:12px; border:1px solid #2a3847;
-      background:#0f141a; color:var(--text); cursor:pointer; font-size:calc(14px + var(--inc));
-    }
-    .btn:hover{border-color:#415e7a}
+/* 토글 스위치 */
+.extrasHeader{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+.toggleWrap{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.toggleLabel{font-size:13px;color:var(--muted);}
+.toggleBtn{width:50px;height:24px;border-radius:999px;background:#2a3847;position:relative;transition:0.3s;}
+.toggleBtn::before{content:'';position:absolute;top:3px;left:4px;width:18px;height:18px;border-radius:50%;background:#fff;transition:0.3s;}
+.toggleBtn.on{background:#2b4e68;}
+.toggleBtn.on::before{left:calc(100% - 22px);}
+.toggleState{font-size:12px;color:#9fb0c0;margin-left:6px;}
 
-    main{
-      height:calc(100vh - var(--header-h));
-      display:grid;
-      grid-template-columns: var(--left-col) 1fr;
-      gap:var(--gap);
-      padding:var(--gap) 16px var(--gap) 16px;
-      padding-left: calc(16px + var(--left-gap));
-      align-items:stretch;
-      min-width: 0;
-    }
+/* 중앙 플레이어 */
+.stack{display:flex;flex-direction:column;gap:var(--gap);align-items:center;justify-content:center;height:100%;}
+.vcard{background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
+  width:90%;max-width:900px;padding:8px;display:flex;flex-direction:column;align-items:center;}
+.vtitle{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#cfe1f3;font-size:calc(13px + var(--inc))}
+.badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
+.vmedia video{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;object-fit:contain;}
+.status{font-size:12px;color:var(--muted);margin-top:4px;}
 
-    .card{
-      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-      padding:12px; overflow:auto; min-height:0;
-    }
-    h2{margin:8px 0 8px; font-size:calc(16px + var(--inc))}
-    label{font-size:calc(12px + var(--inc)); display:block; margin:8px 0 6px; color:var(--muted)}
-    select{
-      width:100%; padding:8px 10px; border-radius:10px;
-      background:#0f141a; color:#fff; border:1px solid #2a3847; font-size:calc(13px + var(--inc));
-    }
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .hint{font-size:calc(11px + var(--inc)); color:var(--muted); margin-top:8px; line-height:1.45; word-break:break-all}
+/* 오른쪽 매뉴얼 */
+.sidepanel{
+  background:var(--panel);border-left:1px solid #1c2a38;padding:12px;
+  overflow:auto;border-radius:var(--radius);
+}
+.sidepanel h3{margin-top:0;color:#cfe3f7}
+.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.imgs img{width:100%;border-radius:8px;border:1px solid #25374a;object-fit:cover;height:100px;}
 
-    .stack{
-      display:grid; gap:var(--gap);
-      grid-template-rows: 1fr 1fr;
-      min-height:0;
-    }
-    .vcard{
-      background:#0e1319; border:1px solid #1e2a36; border-radius:var(--radius);
-      padding:8px; display:flex; flex-direction:column; min-height:0;
-    }
-    .vtitle{display:flex; align-items:center; gap:8px; margin:0 0 6px; color:#cfe1f3; font-size:calc(13px + var(--inc))}
-    .badge{font-size:calc(10px + var(--inc)); padding:2px 8px; border:1px solid #32516d; border-radius:999px; color:#d5e9ff}
-
-    .vmedia{ flex:1 1 auto; min-height:0; display:flex; justify-content:center; align-items:center; }
-    .vw{
-      width:var(--video-w);
-      max-width:var(--safe-w);
-      aspect-ratio:16/9;
-      display:block;
-      margin:0 auto;
-    }
-    .vw video{
-      width:100%; height:100%;
-      border-radius:10px; background:#000; object-fit:contain;
-    }
-
-    #cmpDualWrap{
-      display:grid; grid-template-columns:1fr 1fr; gap:var(--gap);
-      width:var(--video-w); max-width:var(--safe-w);
-      aspect-ratio:16/9;
-      margin:0 auto;
-    }
-    #cmpDualWrap video{
-      width:100%; height:100%;
-      border-radius:10px; background:#000; object-fit:contain;
-    }
-
-    .status{font-size:calc(12px + var(--inc)); color:var(--muted); margin-top:6px; min-height:1.2em}
-
-    .sidepanel{
-      position:fixed; top:0; right:0; width:460px; max-width:92vw; height:100vh; background:var(--panel);
-      border-left:1px solid #1c2a38; transform:translateX(100%); transition:.28s ease;
-      display:flex; flex-direction:column; z-index:50;
-    }
-    .sidepanel.open{transform:translateX(0)}
-    .phead{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-bottom:1px solid #1c2a38}
-    .tabs{display:flex; gap:8px}
-    .tab{padding:8px 12px; border-radius:10px; background:#101823; border:1px solid #1f2b38;
-      color:#cfe3f7; cursor:pointer; font-size:calc(12px + var(--inc));}
-    .tab.active{background:#1b2735; border-color:#35506d}
-    .pcontent{padding:12px 14px; overflow:auto; flex:1}
-    .stage{margin-bottom:12px; border:1px solid #1f2b38; border-radius:12px; padding:10px; background:#0c1117}
-    .stage h3{margin:0 0 6px; font-size:calc(14px + var(--inc))}
-    .imgs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px}
-    .imgs img{width:100%; height:120px; object-fit:cover; border-radius:10px; border:1px solid #25374a}
-    .kv{display:grid; grid-template-columns:100px 1fr; gap:6px; font-size:calc(12px + var(--inc)); color:#b1c0cf; margin-top:4px}
-    .kv b{color:#e8f1f8}
-
-    .brandDock{
-      position:fixed; right:16px; bottom:16px; z-index:60;
-      display:flex; align-items:center; gap:12px;
-      background:rgba(20,26,32,0.85); border:1px solid #2a3847;
-      padding:8px 12px; border-radius:12px; backdrop-filter:blur(2px);
-    }
-    .brandName{
-      font-weight:800;
-      font-size:calc(14px + var(--inc) + 3px);
-      color:#e9f0f5; white-space:nowrap; line-height:1.1; text-align:center;
-    }
-    .brandLogo{
-      height:114px; width:auto; border-radius:6px; object-fit:contain;
-    }
-
-    @media (max-width:1200px){
-      body{ overflow:auto; }
-      main{ grid-template-columns:1fr; height:auto; padding-left:16px; }
-      .stack{ grid-template-rows:auto; }
-      .vw,#cmpDualWrap{ width:100%; max-width:100%; }
-    }
-  </style>
+/* 하단 로고 */
+.brandDock{
+  position:fixed;right:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:10px;
+  background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;
+}
+.brandName{font-weight:700;font-size:18px;}
+.brandLogo{height:80px;width:auto;}
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>버섯 생육 시뮬레이션</h1>
-      <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건/모드 비교 재생 · 우측: 표준 매뉴얼</div>
+<header>
+  <div>
+    <h1>버섯 생육 시뮬레이션</h1>
+    <div class="sub">상단: 표준 영상 자동 재생 · 하단: 선택 조건 비교 재생 · 우측: 표준 매뉴얼</div>
+  </div>
+  <div class="toolbar">
+    <button id="openManual" class="btn">재배 매뉴얼 열기</button>
+    <button id="playBoth" class="btn">둘다 재생</button>
+    <button id="pauseBoth" class="btn">둘다 정지</button>
+    <button id="syncTime" class="btn">동기화</button>
+  </div>
+  <div class="brandDock"><span class="brandName">경기도농업기술원</span><img src="assets/경기도심볼.jpg" class="brandLogo" /></div>
+</header>
+
+<main>
+  <!-- 좌측 -->
+  <section class="card">
+    <h2>Stage1</h2>
+    <div class="row">
+      <div><label>온도(°C)</label><select id="s1temp"><option>13</option><option selected>18</option><option>23</option></select></div>
+      <div><label>광</label><select id="s1light"><option selected>on</option><option>off</option></select></div>
     </div>
-    <div class="brandDock">
-      <span class="brandName">경기도농업기술원</span>
-      <img src="assets/경기도심볼.jpg" alt="경기도 로고" class="brandLogo" />
+    <h2>Stage2</h2>
+    <div class="row">
+      <div><label>온도(°C)</label><select id="s2temp"><option>15</option><option selected>18</option></select></div>
+      <div><label>습도(%)</label><select id="s2hum"><option>60</option><option selected>80</option><option>90</option></select></div>
     </div>
-    <div class="toolbar">
-      <button id="openManual" class="btn" type="button">재배 매뉴얼 열기</button>
-      <button id="playBoth" class="btn" type="button">둘다 재생</button>
-      <button id="pauseBoth" class="btn" type="button">둘다 정지</button>
-      <button id="syncTime" class="btn" type="button">동기화</button>
-    </div>
-  </header>
 
-  <main>
-    <section class="card" aria-label="환경 설정">
-      <h2>Stage1</h2>
-      <div class="row">
-        <div>
-          <label for="s1temp">온도(°C)</label>
-          <select id="s1temp">
-            <option value="13">13</option>
-            <option value="18" selected>18</option>
-            <option value="23">23</option>
-          </select>
-        </div>
-        <div>
-          <label for="s1light">광</label>
-          <select id="s1light">
-            <option value="on" selected>on</option>
-            <option value="off">off</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="s1hum">습도(%)</label>
-          <select id="s1hum" disabled>
-            <option value="90" selected>90</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-
-      <h2>Stage2</h2>
-      <div class="row">
-        <div>
-          <label for="s2temp">온도(°C)</label>
-          <select id="s2temp">
-            <option value="15">15</option>
-            <option value="18" selected>18</option>
-          </select>
-        </div>
-        <div>
-          <label for="s2hum">습도(%)</label>
-          <select id="s2hum">
-            <option value="60">60</option>
-            <option value="80" selected>80</option>
-            <option value="90">90</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="s2light">광</label>
-          <select id="s2light">
-            <option value="on" selected>on</option>
-            <option value="off">off</option>
-          </select>
-        </div>
-        <div>
-          <label>솎기(조합용)</label>
-          <select id="thinning" disabled>
-            <option value="10" selected>10</option>
-          </select>
-        </div>
-      </div>
-
-      <h2>추가 보기 (환경조건 무관)</h2>
-      <div class="row">
-        <div>
-          <label for="quality">품질 등급</label>
-          <select id="quality">
-            <option value="none" selected>—</option>
-            <option value="quality_excellent">특상 (excellent)</option>
-            <option value="quality_high">상 (high)</option>
-            <option value="quality_normal">보통 (normal)</option>
-          </select>
-        </div>
-        <div>
-          <label for="aging">노화 과정</label>
-          <select id="aging">
-            <option value="none" selected>—</option>
-            <option value="15">aging-15</option>
-            <option value="18">aging-18</option>
-            <option value="both">aging-15 & aging-18 (2-up)</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="thinMode">솎기 단독 모드</label>
-          <select id="thinMode">
-            <option value="off" selected>—</option>
-            <option value="on">보기</option>
-          </select>
-        </div>
-        <div>
-          <label for="thinSolo">솎기(단독)</label>
-          <select id="thinSolo">
-            <option value="none" selected>none</option>
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="substrate">배지 변화</label>
-          <select id="substrate">
-            <option value="none" selected>—</option>
-            <option value="on">보기</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="hint">
-        조합: <code>assets/videos/mushroom_S1T{13|18|23}_H90_L{on|off}_S2T{15|18}_H{60|80|90}_L{on|off}_T10.mp4</code><br>
-        품질: <code>assets/videos/quality/{quality_excellent|quality_high|quality_normal}.mp4</code><br>
-        노화: <code>assets/videos/aging/{aging-15|aging-18}.mp4</code><br>
-        배지: <code>assets/videos/substrate/substrate_change.mp4</code><br>
-        솎기: <code>assets/videos/thinning/thinning_{5|10|20|none}.mp4</code>
-      </div>
-    </section>
-
-    <section class="stack">
-      <div class="vcard">
-        <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
-        <div class="vmedia">
-          <div class="vw">
-            <video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-        </div>
-        <div id="stdStatus" class="status"></div>
-      </div>
-
-      <div class="vcard" id="cmpCard">
-        <div class="vtitle">비교 플레이어 <span class="badge">선택 조건/모드</span></div>
-        <div class="vmedia">
-          <div id="cmpSingleWrap" class="vw">
-            <video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-          <div id="cmpDualWrap" style="display:none;">
-            <video id="cmpPlayerA" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-            <video id="cmpPlayerB" controls muted autoplay playsinline webkit-playsinline preload="metadata"></video>
-          </div>
-        </div>
-        <div id="cmpStatus" class="status"></div>
-      </div>
-    </section>
-  </main>
-
-  <aside id="panel" class="sidepanel" aria-hidden="true">
-    <div class="phead">
-      <strong>표준 매뉴얼</strong>
-      <div class="tabs">
-        <button class="tab active" data-tab="manual" type="button">매뉴얼</button>
-        <button class="tab" data-tab="env" type="button">환경조건</button>
-      </div>
-      <button id="closeManual" class="btn closeX" type="button">닫기</button>
-    </div>
-    <div class="pcontent">
-      <div id="manual" class="tabpage" style="display:block;">
-        <div class="stage"><h3>① 입상(개봉)</h3>
-          <div class="imgs">
-            <img src="assets/입상(개봉)_1.jpg" alt="입상(개봉) 1">
-            <img src="assets/입상(개봉)_2.jpg" alt="입상(개봉) 2">
-          </div>
-          <div class="kv"><b>설명</b><span>배지를 개봉하고 생육 준비 단계 시작</span></div>
-          <div class="kv"><b>환경</b><span>온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</span></div>
-        </div>
-        <div class="stage"><h3>② 발이 후 생육</h3>
-          <div class="imgs"><img src="assets/발이 후 생육.jpg" alt="발이 후 생육"></div>
-          <div class="kv"><b>설명</b><span>균사가 활발히 성장하는 시기</span></div>
-          <div class="kv"><b>환경</b><span>온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</span></div>
-        </div>
-        <div class="stage"><h3>③ 솎기</h3>
-          <div class="imgs"><img src="assets/솎기.jpg" alt="솎기"></div>
-          <div class="kv"><b>설명</b><span>1배지당 8~10개로 솎아 균일 생육 확보</span></div>
-        </div>
-        <div class="stage"><h3>④ 솎기 후 생육</h3>
-          <div class="imgs">
-            <img src="assets/솎기 후 생육_1.jpg" alt="솎기 후 생육 1">
-            <img src="assets/솎기 후 생육_2.jpg" alt="솎기 후 생육 2">
-          </div>
-          <div class="kv"><b>설명</b><span>솎기 후 균일하게 자란 버섯, 광/환기 관리 중요</span></div>
-        </div>
-        <div class="stage"><h3>⑤ 수확</h3>
-          <div class="imgs"><img src="assets/수확_1.jpg" alt="수확"></div>
-          <div class="kv"><b>설명</b><span>품질 구분: 특상 / 상 / 보통</span></div>
-        </div>
-      </div>
-
-      <div id="env" class="tabpage" style="display:none;">
-        <h3>기본 환경조건</h3>
-        <ul>
-          <li>입상(개봉): 온도 18±2℃, 습도 90±1%, CO₂ 800±200ppm, 광 on</li>
-          <li>발이 후 생육: 온도 15℃, 습도 80±1%, CO₂ 800±200ppm, 광 on</li>
-        </ul>
-        <p style="color:#9fb0c0;">※ 교육용 예시입니다. 실제 조건은 농장/품종/시기에 따라 조정하세요.</p>
+    <div class="extrasHeader">
+      <h2 style="margin:0;">추가 보기 (환경조건 무관)</h2>
+      <div class="toggleWrap" id="extrasToggle">
+        <div class="toggleLabel">비교에 적용</div>
+        <div class="toggleBtn" id="extrasBtn"></div>
+        <div class="toggleState" id="extrasState">OFF</div>
       </div>
     </div>
+
+    <div class="row">
+      <div><label>품질</label><select id="quality"><option>none</option><option>quality_excellent</option><option>quality_high</option><option>quality_normal</option></select></div>
+      <div><label>노화</label><select id="aging"><option>none</option><option>15</option><option>18</option><option>both</option></select></div>
+    </div>
+  </section>
+
+  <!-- 중앙 -->
+  <section class="stack">
+    <div class="vcard">
+      <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
+      <div class="vmedia"><video id="stdPlayer" controls muted autoplay playsinline webkit-playsinline></video></div>
+      <div id="stdStatus" class="status"></div>
+    </div>
+    <div class="vcard">
+      <div class="vtitle">비교 플레이어 <span class="badge">선택 조건</span></div>
+      <div class="vmedia"><video id="cmpPlayer" controls muted autoplay playsinline webkit-playsinline></video></div>
+      <div id="cmpStatus" class="status"></div>
+    </div>
+  </section>
+
+  <!-- 우측 -->
+  <aside class="sidepanel" id="panel">
+    <h3>표준 매뉴얼</h3>
+    <div class="stage"><h4>① 입상(개봉)</h4>
+      <div class="imgs"><img src="assets/입상(개봉)_1.jpg"><img src="assets/입상(개봉)_2.jpg"></div>
+      <p>배지를 개봉하고 생육 준비 단계 시작</p></div>
+    <div class="stage"><h4>② 발이 후 생육</h4><div class="imgs"><img src="assets/발이 후 생육.jpg"></div></div>
   </aside>
+</main>
 
-  <script>
-    const base="assets/videos";
-    const STANDARD_PATH=`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`;
-    const stdPlayer=document.getElementById("stdPlayer");
-    const cmpPlayer=document.getElementById("cmpPlayer");
-    const cmpPlayerA=document.getElementById("cmpPlayerA");
-    const cmpPlayerB=document.getElementById("cmpPlayerB");
-    const stdStatus=document.getElementById("stdStatus");
-    const cmpStatus=document.getElementById("cmpStatus");
-    const cmpSingleWrap=document.getElementById("cmpSingleWrap");
-    const cmpDualWrap=document.getElementById("cmpDualWrap");
+<script>
+const base="assets/videos";
+const std=document.getElementById("stdPlayer");
+const cmp=document.getElementById("cmpPlayer");
+const stdStatus=document.getElementById("stdStatus");
+const cmpStatus=document.getElementById("cmpStatus");
+const extrasBtn=document.getElementById("extrasBtn");
+const extrasState=document.getElementById("extrasState");
+const panel=document.getElementById("panel");
+const openManual=document.getElementById("openManual");
 
-    async function ensurePlay(p){try{p.muted=true;p.autoplay=true;p.setAttribute("playsinline","");p.setAttribute("webkit-playsinline","");await p.play();}catch{}}
-    async function unlockAutoplay(){const all=[stdPlayer,cmpPlayer,cmpPlayerA,cmpPlayerB];for(const p of all)await ensurePlay(p);}
-    ['pointerdown','keydown','touchstart'].forEach(e=>window.addEventListener(e,unlockAutoplay,{once:true}));
+openManual.addEventListener("click",()=>{panel.scrollIntoView({behavior:"smooth"});});
 
-    async function fileExists(url){try{return (await fetch(url,{method:"HEAD"})).ok}catch{return false}}
-    const withCacheBuster=url=>{const u=new URL(url,location.href);u.searchParams.set("v",Date.now());return u.toString();};
+let extrasOn=false;
+document.getElementById("extrasToggle").addEventListener("click",()=>{
+  extrasOn=!extrasOn;
+  extrasBtn.classList.toggle("on",extrasOn);
+  extrasState.textContent=extrasOn?"ON":"OFF";
+  cmpStatus.textContent=extrasOn?"비교 모드(추가 보기)":"기본 비교 모드";
+  loadVideo();
+});
 
-    async function loadToPlayer(player,status,relPath){
-      const url=encodeURI(relPath);const ok=await fileExists(url);
-      if(!ok){status.textContent=`❌ 파일 없음: ${relPath}`;return}
-      player.src=withCacheBuster(url);
-      player.oncanplay=()=>status.textContent=`재생 중: ${relPath}`;
-      player.onerror=()=>status.textContent=`⚠️ 재생 오류: ${relPath}`;
-      await ensurePlay(player);
-    }
+async function fileExists(url){try{return (await fetch(url,{method:"HEAD"})).ok}catch{return false}}
+async function ensurePlay(p){try{p.muted=true;p.setAttribute("playsinline","");await p.play();}catch{}}
 
-    (async()=>{await loadToPlayer(stdPlayer,stdStatus,STANDARD_PATH);await unlockAutoplay();})();
-  </script>
+async function loadVideo(){
+  const stdPath=`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`;
+  const cmpPath=extrasOn?`${base}/aging/aging-15.mp4`:`${base}/quality/quality_excellent.mp4`;
+  if(await fileExists(stdPath)){std.src=stdPath;stdStatus.textContent="표준 영상 재생";}
+  if(await fileExists(cmpPath)){cmp.src=cmpPath;cmpStatus.textContent="비교 영상 재생";}
+  await ensurePlay(std);await ensurePlay(cmp);
+}
+loadVideo();
+
+document.getElementById("playBoth").addEventListener("click",()=>{std.play();cmp.play();});
+document.getElementById("pauseBoth").addEventListener("click",()=>{std.pause();cmp.pause();});
+document.getElementById("syncTime").addEventListener("click",()=>{cmp.currentTime=std.currentTime;});
+</script>
 </body>
 </html>
