@@ -8,13 +8,13 @@
 :root{
   --bg:#0b0e11; --card:#141a20; --line:#213040; --text:#e9f0f5; --muted:#9fb0c0; --panel:#0e1319;
   --radius:14px; --inc:5pt; --header-h:72px; --gap:12px;
-  --left-col:25vw; /* 왼쪽 패널 약 25% */
-  --center-col:50vw; /* 플레이어 중앙 50% */
 }
 *{box-sizing:border-box;}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui, Arial, "Noto Sans KR";font-size:calc(17px + var(--inc));line-height:1.5;overflow:hidden;
+  font-family:system-ui, Arial, "Noto Sans KR";font-size:calc(16px + var(--inc));line-height:1.5;overflow:hidden;
 }
+
+/* 헤더 */
 header{
   height:var(--header-h);
   display:flex;align-items:center;justify-content:space-between;
@@ -29,22 +29,26 @@ h1{margin:0;font-size:calc(27px + var(--inc))}
 }
 .btn:hover{border-color:#415e7a}
 
-/* ===== 메인 레이아웃 ===== */
+/* 메인 레이아웃 */
 main{
   display:grid;
-  grid-template-columns: var(--left-col) var(--center-col) 1fr;
-  grid-template-rows: calc(100vh - var(--header-h));
+  grid-template-columns: 25% 50% 25%;
   height:calc(100vh - var(--header-h));
   gap:var(--gap);
   padding:var(--gap);
 }
 
 /* 좌측 환경패널 */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:12px;overflow:auto;}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;overflow:auto;
+}
 h2{margin:8px 0;font-size:calc(16px + var(--inc))}
 label{font-size:calc(12px + var(--inc));display:block;margin:8px 0 6px;color:var(--muted)}
-select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#fff;border:1px solid #2a3847;}
+select{
+  width:100%;padding:8px 10px;border-radius:10px;
+  background:#0f141a;color:#fff;border:1px solid #2a3847;
+}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .hint{font-size:calc(11px + var(--inc));color:var(--muted);margin-top:8px;line-height:1.45;word-break:break-all}
 
@@ -59,15 +63,20 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
 .toggleState{font-size:12px;color:#9fb0c0;margin-left:6px;}
 
 /* 중앙 플레이어 */
-.stack{display:flex;flex-direction:column;gap:var(--gap);align-items:center;justify-content:center;height:100%;}
-.vcard{background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
-  width:90%;max-width:900px;padding:8px;display:flex;flex-direction:column;align-items:center;}
+.stack{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:var(--gap);
+}
+.vcard{
+  background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
+  width:90%;max-width:960px;padding:8px;display:flex;flex-direction:column;align-items:center;
+}
 .vtitle{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#cfe1f3;font-size:calc(13px + var(--inc))}
 .badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
 .vmedia video{width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;object-fit:contain;}
 .status{font-size:12px;color:var(--muted);margin-top:4px;}
 
-/* 오른쪽 매뉴얼 */
+/* 우측 매뉴얼 */
 .sidepanel{
   background:var(--panel);border-left:1px solid #1c2a38;padding:12px;
   overflow:auto;border-radius:var(--radius);
@@ -76,7 +85,7 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
 .imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .imgs img{width:100%;border-radius:8px;border:1px solid #25374a;object-fit:cover;height:100px;}
 
-/* 하단 로고 */
+/* 우측 하단 로고 */
 .brandDock{
   position:fixed;right:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:10px;
   background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;
@@ -101,7 +110,7 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
 </header>
 
 <main>
-  <!-- 좌측 -->
+  <!-- 좌측 환경 설정 -->
   <section class="card">
     <h2>Stage1</h2>
     <div class="row">
@@ -122,6 +131,7 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
         <div class="toggleState" id="extrasState">OFF</div>
       </div>
     </div>
+    <p style="font-size:12px;color:#9fb0c0;">OFF: 환경조합 기본 / ON: 추가 보기(품질·노화·배지·솎기단독)로 비교</p>
 
     <div class="row">
       <div><label>품질</label><select id="quality"><option>none</option><option>quality_excellent</option><option>quality_high</option><option>quality_normal</option></select></div>
@@ -129,7 +139,7 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
     </div>
   </section>
 
-  <!-- 중앙 -->
+  <!-- 중앙 플레이어 -->
   <section class="stack">
     <div class="vcard">
       <div class="vtitle">기준 플레이어 <span class="badge">표준 영상</span></div>
@@ -143,13 +153,14 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
     </div>
   </section>
 
-  <!-- 우측 -->
+  <!-- 우측 매뉴얼 -->
   <aside class="sidepanel" id="panel">
     <h3>표준 매뉴얼</h3>
     <div class="stage"><h4>① 입상(개봉)</h4>
       <div class="imgs"><img src="assets/입상(개봉)_1.jpg"><img src="assets/입상(개봉)_2.jpg"></div>
       <p>배지를 개봉하고 생육 준비 단계 시작</p></div>
     <div class="stage"><h4>② 발이 후 생육</h4><div class="imgs"><img src="assets/발이 후 생육.jpg"></div></div>
+    <div class="stage"><h4>③ 솎기</h4><div class="imgs"><img src="assets/솎기.jpg"></div></div>
   </aside>
 </main>
 
@@ -161,8 +172,8 @@ const stdStatus=document.getElementById("stdStatus");
 const cmpStatus=document.getElementById("cmpStatus");
 const extrasBtn=document.getElementById("extrasBtn");
 const extrasState=document.getElementById("extrasState");
-const panel=document.getElementById("panel");
 const openManual=document.getElementById("openManual");
+const panel=document.getElementById("panel");
 
 openManual.addEventListener("click",()=>{panel.scrollIntoView({behavior:"smooth"});});
 
@@ -171,7 +182,7 @@ document.getElementById("extrasToggle").addEventListener("click",()=>{
   extrasOn=!extrasOn;
   extrasBtn.classList.toggle("on",extrasOn);
   extrasState.textContent=extrasOn?"ON":"OFF";
-  cmpStatus.textContent=extrasOn?"비교 모드(추가 보기)":"기본 비교 모드";
+  cmpStatus.textContent=extrasOn?"비교 모드: 추가 보기":"기본 비교 모드";
   loadVideo();
 });
 
