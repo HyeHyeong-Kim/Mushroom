@@ -67,17 +67,32 @@ select{
   background:#0e1319;border:1px solid #1e2a36;border-radius:var(--radius);
   display:flex;flex-direction:column;align-items:center;
 }
-.vtitle{display:flex;align-items:center;gap:8px;margin:6px 0;color:#cfe1f3;font-size:15px;}
+.vtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: #cfe1f3;
+  font-size: 15px;
+  justify-content: flex-start;  /* ✅ 왼쪽 정렬 */
+  width: 100%;
+  padding-left: 2cm;            /* ✅ 영상 왼쪽 여백과 맞춤 */
+}
 .badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
-.vmedia{flex:1;display:flex;justify-content:center;align-items:center;}
+.vmedia {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;  /* ✅ 영상 왼쪽 정렬 */
+  align-items: center;
+  padding-left: 2cm;            /* ✅ 좌측에서 2cm 띄움 */
+}
+
 .vmedia video {
-  width:var(--video-w);
-  height:calc(50vh - 6rem);
-  border-radius:10px;
-  background:#000;
-  object-fit:contain;
-  display:block;
-  margin:0 auto; /* ✅ 중앙 정렬 */
+  width: var(--video-w);
+  height: calc(50vh - 6rem);
+  border-radius: 10px;
+  background: #000;
+  object-fit: contain;
 }
 .status{font-size:13px;color:var(--muted);margin-bottom:4px;}
 
@@ -105,7 +120,7 @@ select{
   position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:12px;
   background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;
 }
-.brandName{font-weight:800;font-size:17px;color:#e9f0f5;}
+.brandName{font-weight:800;font-size:20px;color:#e9f0f5;}
 .brandLogo{height:96px;width:auto;}
 </style>
 </head>
@@ -295,5 +310,6 @@ async function updateCompare(){
 </script>
 </body>
 </html>
+
 
 
