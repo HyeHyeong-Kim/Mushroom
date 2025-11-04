@@ -155,6 +155,11 @@ select{
         </select>
       </div>
     </div>
+
+    <div style="margin-top: 12px; text-align:center;">
+      <button id="comparePlay" class="btn" type="button">비교 재생 ▶</button>
+    </div>
+
     
     <div class="extrasHeader"><h2>추가 보기 (환경조건 무관)</h2><label class="extrasToggle"><div class="switch"><input type="checkbox" id="extrasSwitch"/><div class="track"></div><div class="thumb"></div></div></label></div>
     <div class="row"><div><label>품질</label><select id="quality"><option>none</option><option>quality_excellent</option><option>quality_high</option><option>quality_normal</option></select></div><div><label>노화</label><select id="aging"><option>none</option><option>15</option><option>18</option><option>both</option></select></div></div>
@@ -214,6 +219,11 @@ const cmp=document.getElementById("cmpPlayer");
 const stdStatus=document.getElementById("stdStatus");
 const cmpStatus=document.getElementById("cmpStatus");
 const extrasSwitch=document.getElementById("extrasSwitch");
+const comparePlay = document.getElementById("comparePlay");
+  comparePlay.addEventListener("click", async ()=>{
+    await updateCompare();
+  });
+
 let extrasOn=false;
 
 document.querySelectorAll(".tab").forEach(btn=>{
@@ -226,7 +236,7 @@ document.querySelectorAll(".tab").forEach(btn=>{
 });
 
 extrasSwitch.addEventListener("change",()=>{extrasOn=extrasSwitch.checked;updateCompare();});
-document.querySelectorAll("select").forEach(sel=>sel.addEventListener("change",updateCompare));
+// document.querySelectorAll("select").forEach(sel=>sel.addEventListener("change",updateCompare));
 
 const panel=document.getElementById("panel");
 document.getElementById("openManual").onclick=()=>panel.classList.add("open");
@@ -268,6 +278,7 @@ async function updateCompare(){
 </script>
 </body>
 </html>
+
 
 
 
