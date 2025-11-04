@@ -70,9 +70,14 @@ select{
 .vtitle{display:flex;align-items:center;gap:8px;margin:6px 0;color:#cfe1f3;font-size:15px;}
 .badge{font-size:12px;padding:2px 8px;border:1px solid #32516d;border-radius:999px;color:#d5e9ff}
 .vmedia{flex:1;display:flex;justify-content:center;align-items:center;}
-.vmedia video{
-  width:var(--video-w);height:calc(50vh - 6rem);border-radius:10px;background:#000;object-fit:contain;
-  position:relative;left:-2cm;
+.vmedia video {
+  width:var(--video-w);
+  height:calc(50vh - 6rem);
+  border-radius:10px;
+  background:#000;
+  object-fit:contain;
+  display:block;
+  margin:0 auto; /* ✅ 중앙 정렬 */
 }
 .status{font-size:13px;color:var(--muted);margin-bottom:4px;}
 
@@ -290,4 +295,5 @@ async function updateCompare(){
 </script>
 </body>
 </html>
+
 
