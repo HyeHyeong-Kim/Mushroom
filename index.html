@@ -58,23 +58,6 @@ select{width:100%;padding:8px 10px;border-radius:10px;background:#0f141a;color:#
 .vmedia video{width:var(--video-w);height:calc(50vh - 6rem);border-radius:10px;background:#000;object-fit:contain;}
 .status{font-size:13px;color:var(--muted);margin-bottom:4px;}
 
-/* 표준 매뉴얼 */
-.sidepanel{position:fixed;top:0;right:0;width:540px;height:100vh;background:var(--panel);
-  border-left:1px solid #1c2a38;transform:translateX(100%);transition:.3s;
-  display:flex;flex-direction:column;z-index:50;}
-.sidepanel.open{transform:translateX(0);}
-.phead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #1c2a38;}
-.tabs{display:flex;gap:8px;}
-.tab{padding:8px 12px;border-radius:10px;background:#101823;border:1px solid #1f2b38;color:#cfe3f7;cursor:pointer;}
-.tab.active{background:#1b2735;border-color:#35506d;}
-.pcontent{padding:20px 24px;overflow:auto;flex:1;font-size:16px;}
-.stage{margin-bottom:12px;border:1px solid #1f2b38;border-radius:12px;padding:10px;background:#0c1117;}
-.stage h3{margin:0 0 6px;font-size:17px;}
-.imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-.imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a;}
-.kv{display:grid;grid-template-columns:100px 1fr;gap:6px;color:#b1c0cf;margin-top:4px;font-size:15px;}
-.kv b{color:#e8f1f8;}
-
 /* 로고 */
 .brandDock{position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:12px;
   background:rgba(20,26,32,0.85);border:1px solid #2a3847;padding:8px 12px;border-radius:12px;}
@@ -149,33 +132,25 @@ const pauseBoth=document.getElementById("pauseBoth");
 const syncTime=document.getElementById("syncTime");
 let extrasOn=false;
 
-// ====================== UI 제어 ======================
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll(".tabpage").forEach(p=>p.style.display="none");
-    document.getElementById(btn.dataset.tab).style.display="block";
-  });
-});
-extrasSwitch.addEventListener("change",()=>{extrasOn=extrasSwitch.checked;});
-
-// 매뉴얼 패널
+// 매뉴얼 패널 (닫힘/열림)
 const panel=document.getElementById("panel");
-document.getElementById("openManual").onclick=()=>panel.classList.add("open");
-document.getElementById("closeManual").onclick=()=>panel.classList.remove("open");
+if(panel){
+  document.getElementById("openManual").onclick=()=>panel.classList.add("open");
+  document.getElementById("closeManual").onclick=()=>panel.classList.remove("open");
+}
 
-// ====================== 영상 로드 & 제어 ======================
+// 영상 파일 로드
 async function fileExists(u){try{return (await fetch(u,{method:"HEAD"})).ok}catch{return false}}
-async function ensurePlay(p){try{p.muted=true;await p.play();}catch{}}
+async function ensurePlay(p){try{p.muted=true;p.setAttribute("playsinline","");await p.play();}catch{}}
 async function loadToPlayer(player,status,path){
   const ok=await fileExists(path);
   if(!ok){status.textContent="파일 없음: "+path;return;}
-  player.src=`${path}?v=${Date.now()}`;
+  player.src=`${path}?v=${Date.now()}`; // 캐시 방지
   await ensurePlay(player);
   status.textContent="재생 중: "+path.split('/').pop();
 }
 
+// 비교영상 갱신
 async function updateCompare(){
   let rel="";
   if(extrasOn){
@@ -198,27 +173,17 @@ async function updateCompare(){
   await loadToPlayer(cmp,cmpStatus,rel);
 }
 
-// ====================== 버튼 기능 ======================
-comparePlay.addEventListener("click", async ()=>{
+// 버튼 이벤트
+comparePlay.addEventListener("click",async()=>{
   await updateCompare();
   await ensurePlay(std);
   await ensurePlay(cmp);
 });
+playBoth.addEventListener("click",async()=>{await ensurePlay(std);await ensurePlay(cmp);});
+pauseBoth.addEventListener("click",()=>{std.pause();cmp.pause();});
+syncTime.addEventListener("click",()=>{cmp.currentTime=std.currentTime;});
 
-playBoth.addEventListener("click",async()=>{
-  await ensurePlay(std);
-  await ensurePlay(cmp);
-});
-
-pauseBoth.addEventListener("click",()=>{
-  std.pause(); cmp.pause();
-});
-
-syncTime.addEventListener("click",()=>{
-  cmp.currentTime=std.currentTime;
-});
-
-// ====================== 초기 로드 ======================
+// 초기 로드
 (async()=>{
   await loadToPlayer(std,stdStatus,`${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`);
 })();
