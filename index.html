@@ -247,9 +247,9 @@ async function updateCompare(){
     else if(a!=="none") rel=`${base}/aging/aging-${a}.mp4`;
     else if(s==="on") rel=`${base}/substrate/substrate_change.mp4`;
     else if(t!=="none"){
-      if (t === "thinning_none") rel = '${base}/thinning/thinning_none.mp4';
-      else rel =`${base}/thinning/thinning_${t}.mp4`;
-    }
+      if (t === "thinning_none") rel = `${base}/thinning/thinning_none.mp4`;
+      else rel = `${base}/thinning/thinning_${t}.mp4`;
+}
   } else {
     const s1t=document.getElementById("s1temp").value;
     const s1l=document.getElementById("s1light").value;
@@ -268,6 +268,7 @@ async function updateCompare(){
 </script>
 </body>
 </html>
+
 
 
 
