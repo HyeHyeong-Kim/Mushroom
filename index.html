@@ -87,12 +87,12 @@ select{
 .tabs{display:flex;gap:8px;}
 .tab{padding:8px 12px;border-radius:10px;background:#101823;border:1px solid #1f2b38;color:#cfe3f7;cursor:pointer;}
 .tab.active{background:#1b2735;border-color:#35506d;}
-.pcontent{padding:12px 14px;overflow:auto;flex:1;font-size:14px;} /* ← 전체 폰트 약간 축소 */
+.pcontent{padding:12px 14px;overflow:auto;flex:1;font-size:16px;} /* ← 전체 폰트 약간 축소 */
 .stage{margin-bottom:12px;border:1px solid #1f2b38;border-radius:12px;padding:10px;background:#0c1117;}
-.stage h3{margin:0 0 6px;font-size:15px;}
+.stage h3{margin:0 0 6px;font-size:17px;}
 .imgs{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
 .imgs img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #25374a;}
-.kv{display:grid;grid-template-columns:100px 1fr;gap:6px;color:#b1c0cf;margin-top:4px;font-size:13px;}
+.kv{display:grid;grid-template-columns:100px 1fr;gap:6px;color:#b1c0cf;margin-top:4px;font-size:15px;}
 .kv b{color:#e8f1f8;}
 
 /* 로고 */
@@ -122,9 +122,40 @@ select{
 <main>
   <section class="card">
     <h2>Stage1</h2>
-    <div class="row"><div><label>온도(°C)</label><select id="s1temp"><option>13</option><option selected>18</option><option>23</option></select></div><div><label>광</label><select id="s1light"><option selected>on</option><option>off</option></select></div></div>
+    <div class="row">
+      <div><label>온도(°C)</label>
+        <select id="s1temp">
+          <option>13</option>
+          <option selected>18</option>
+          <option>23</option></select>
+      </div><div><label>광</label>
+        <select id="s1light">
+          <option selected>on</option>
+          <option>off</option>
+        </select>
+      </div>
+    </div>
     <h2>Stage2</h2>
-    <div class="row"><div><label>온도(°C)</label><select id="s2temp"><option>15</option><option selected>18</option></select></div><div><label>광</label><select id="s1light"><option selected>on</option><option>off</div><div><label>습도(%)</label><select id="s2hum">/option><option selected>80</option><option>90</option></select></div></div>
+    <div class="row">
+      <div><label>온도(°C)</label>
+        <select id="s2temp"><option>15</option>
+          <option selected>18</option>
+        </select>
+      </div>
+      <div><label>광</label>
+        <select id="s1light">
+          <option selected>on</option>
+          <option>off</option>
+        </select>
+      </div>
+      <div><label>습도(%)</label>
+        <select id="s2hum">
+          <option selected>80</option>
+          <option>90</option>
+        </select>
+      </div>
+    </div>
+    
     <div class="extrasHeader"><h2>추가 보기 (환경조건 무관)</h2><label class="extrasToggle"><div class="switch"><input type="checkbox" id="extrasSwitch"/><div class="track"></div><div class="thumb"></div></div></label></div>
     <div class="row"><div><label>품질</label><select id="quality"><option>none</option><option>quality_excellent</option><option>quality_high</option><option>quality_normal</option></select></div><div><label>노화</label><select id="aging"><option>none</option><option>15</option><option>18</option><option>both</option></select></div></div>
     <div class="row"><div><label>배지</label><select id="substrate"><option>none</option><option>on</option></select></div><div><label>솎기 단독</label><select id="thinSolo"><option>none</option><option>5</option><option>10</option><option>20</option></select></div></div>
@@ -210,6 +241,7 @@ async function updateCompare(){
     const s1t=document.getElementById("s1temp").value;
     const s1l=document.getElementById("s1light").value;
     const s2t=document.getElementById("s2temp").value;
+    const s2l=document.getElementById("s2light").value;
     const s2h=document.getElementById("s2hum").value;
     rel=`${base}/mushroom_S1T${s1t}_H90_L${s1l}_S2T${s2t}_H${s2h}_Lon_T10.mp4`;
   }
@@ -223,4 +255,5 @@ async function updateCompare(){
 </script>
 </body>
 </html>
+
 
