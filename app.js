@@ -8,8 +8,6 @@
    - 동기화 기능
    - 선택 변경 시 비교영상 자동 갱신
 ========================= */
-document.body.insertAdjacentHTML("afterbegin", "<div style='position:fixed;top:10px;left:10px;z-index:9999;background:#ff0;color:#000;padding:6px 10px;border-radius:8px;font-weight:800'>app.js loaded</div>");
-
 const base = "assets/videos";
 
 // Players & status
