@@ -1,0 +1,130 @@
+const base = "assets/videos";
+
+const std = document.getElementById("stdPlayer");
+const cmp = document.getElementById("cmpPlayer");
+const stdStatus = document.getElementById("stdStatus");
+const cmpStatus = document.getElementById("cmpStatus");
+const extrasSwitch = document.getElementById("extrasSwitch");
+const comparePlay = document.getElementById("comparePlay");
+
+// 비교 재생 버튼
+comparePlay.addEventListener("click", async () => {
+  await updateCompare();
+  await ensurePlay(std);
+  await ensurePlay(cmp);
+});
+
+let extrasOn = false;
+
+// 탭 전환
+document.querySelectorAll(".tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".tabpage").forEach((p) => (p.style.display = "none"));
+    document.getElementById(btn.dataset.tab).style.display = "block";
+  });
+});
+
+// 추가보기 스위치
+extrasSwitch.addEventListener("change", () => {
+  extrasOn = extrasSwitch.checked;
+  updateCompare();
+});
+
+// 매뉴얼 패널 열기/닫기
+const panel = document.getElementById("panel");
+document.getElementById("openManual").onclick = () => panel.classList.add("open");
+document.getElementById("closeManual").onclick = () => panel.classList.remove("open");
+
+// ✅ file:// 환경에서는 fetch(HEAD) 자체가 막히는 경우가 많아서 검사 생략
+async function fileExists(u) {
+  if (location.protocol === "file:") return true;
+
+  try {
+    const res = await fetch(u, { method: "HEAD", cache: "no-store" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// 자동 재생 보장(브라우저 정책상 실패할 수 있음)
+async function ensurePlay(p) {
+  try {
+    p.muted = true;
+    p.setAttribute("playsinline", "");
+    await p.play();
+  } catch {
+    // 자동재생이 막히면 사용자가 재생 버튼을 누르면 됨
+  }
+}
+
+// 플레이어에 로드 + 상태 표시 강화
+async function loadToPlayer(player, status, path) {
+  // 이전 이벤트 제거(중복 방지)
+  player.onerror = null;
+  player.onloadeddata = null;
+
+  // 상태 초기화
+  status.textContent = "로딩 중: " + path.split("/").pop();
+
+  // file:// 일 때는 fetch가 막히므로 일단 src를 넣고 에러로 판단
+  const ok = await fileExists(path);
+  if (!ok) {
+    status.textContent = "파일 없음(또는 접근 불가): " + path;
+    player.src = path; // 그래도 혹시 모르니 시도
+    return;
+  }
+
+  player.onerror = () => {
+    status.textContent = "재생 실패(경로/파일명 확인): " + path;
+  };
+  player.onloadeddata = () => {
+    status.textContent = "로딩 완료: " + decodeURIComponent(path.split("/").pop());
+  };
+
+  // 캐시 무효화(서버일 때 유효). file://에서도 큰 문제 없음.
+  player.src = path + (path.includes("?") ? "&" : "?") + "v=" + Date.now();
+  await ensurePlay(player);
+}
+
+// 조건에 맞는 비교 영상 로드
+async function updateCompare() {
+  let rel = "";
+
+  if (extrasOn) {
+    const q = document.getElementById("quality").value;
+    const a = document.getElementById("aging").value;
+    const s = document.getElementById("substrate").value;
+    const t = document.getElementById("thinSolo").value;
+
+    if (q !== "none") rel = `${base}/quality/${q}.mp4`;
+    else if (a !== "none") rel = `${base}/aging/aging-${a}.mp4`;
+    else if (s === "on") rel = `${base}/substrate/substrate_change.mp4`;
+    else if (t !== "none") {
+      if (t === "thinning_none") rel = `${base}/thinning/thinning_none.mp4`;
+      else rel = `${base}/thinning/thinning_${t}.mp4`;
+    }
+  } else {
+    const s1t = document.getElementById("s1temp").value;
+    const s1l = document.getElementById("s1light").value;
+    const s2t = document.getElementById("s2temp").value;
+    const s2l = document.getElementById("s2light").value;
+    const s2h = document.getElementById("s2hum").value;
+
+    rel = `${base}/mushroom_S1T${s1t}_H90_L${s1l}_S2T${s2t}_H${s2h}_L${s2l}_T10.mp4`;
+  }
+
+  await loadToPlayer(cmp, cmpStatus, rel);
+}
+
+// 초기 로드
+(async () => {
+  await loadToPlayer(
+    std,
+    stdStatus,
+    `${base}/mushroom_S1T18_H90_Lon_S2T15_H80_Lon_T10.mp4`
+  );
+  await updateCompare();
+})();
