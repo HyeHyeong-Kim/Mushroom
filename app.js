@@ -8,6 +8,7 @@
    - 동기화 기능
    - 선택 변경 시 비교영상 자동 갱신
 ========================= */
+alert("app.js loaded");
 
 const base = "assets/videos";
 
